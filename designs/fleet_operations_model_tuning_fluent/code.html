@@ -1,0 +1,765 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head></head><body class="bg-[#1a1a1a] text-on-surface antialiased flex selection:bg-fluent-blue selection:text-white min-h-screen"><svg class="inline-defs-container" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></svg>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Synthetix Factory OS - Fleet &amp; Tuning</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#1f1f1f",
+            "surface-dim": "#181818",
+            "surface-bright": "#333333",
+            "surface-container-lowest": "#141414",
+            "surface-container-low": "#202020",
+            "surface-container": "#272727",
+            "surface-container-high": "#2e2e2e",
+            "surface-container-highest": "#383838",
+            "outline": "#444444",
+            "outline-variant": "rgba(255, 255, 255, 0.08)",
+            "fluent-border": "rgba(255, 255, 255, 0.08)",
+            "fluent-hover": "rgba(255, 255, 255, 0.05)",
+            "fluent-pressed": "rgba(255, 255, 255, 0.03)",
+            "fluent-blue": "#0078d4",
+            "fluent-blue-hover": "#1084df",
+            "fluent-blue-active": "#006cbe",
+            "fluent-blue-light": "#2899f5",
+            "fluent-teal": "#13a10e",
+            "primary": "#2899f5",
+            "primary-container": "#0078d4",
+            "on-primary": "#ffffff",
+            "on-primary-container": "#ffffff",
+            "secondary": "#9bb5d9",
+            "secondary-container": "#2b3b52",
+            "tertiary": "#60cdff",
+            "error": "#ff6f61",
+            "error-container": "#4a1216",
+            "on-surface": "#f3f3f3",
+            "on-surface-variant": "#adadad",
+            "on-surface-subtle": "#777777"
+          },
+          fontFamily: {
+            sans: [
+              "-apple-system",
+              "BlinkMacSystemFont",
+              "Segoe UI Variable Text",
+              "Segoe UI Variable Display",
+              "Segoe UI",
+              "system-ui",
+              "Helvetica Neue",
+              "sans-serif"
+            ],
+            mono: [
+              "Cascadia Code",
+              "Consolas",
+              "JetBrains Mono",
+              "SF Mono",
+              "monospace"
+            ]
+          },
+          borderRadius: {
+            'fluent-sm': '4px',
+            'fluent': '6px',
+            'fluent-card': '8px',
+            'fluent-pill': '9999px'
+          },
+          boxShadow: {
+            'fluent-depth-4': '0 1.6px 3.6px 0 rgba(0,0,0,0.22), 0 0.3px 0.9px 0 rgba(0,0,0,0.18)',
+            'fluent-depth-8': '0 3.2px 7.2px 0 rgba(0,0,0,0.28), 0 0.6px 1.8px 0 rgba(0,0,0,0.22)',
+            'fluent-depth-16': '0 6.4px 14.4px 0 rgba(0,0,0,0.32), 0 1.2px 3.6px 0 rgba(0,0,0,0.24)',
+            'fluent-flyout': '0 12px 28px 0 rgba(0,0,0,0.40), 0 2px 4px 0 rgba(0,0,0,0.25)'
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        background-color: #1a1a1a;
+        color: #f3f3f3;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.16);
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.28);
+      }
+    }
+    .fluent-card {
+      background: #242424;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.24), 0 0.3px 0.9px 0 rgba(0, 0, 0, 0.16);
+      border-radius: 8px;
+    }
+    .fluent-card-elevated {
+      background: #2a2a2a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      border-radius: 8px;
+    }
+    .fluent-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #f3f3f3;
+      transition: all 0.15s cubic-bezier(0, 0, 0, 1);
+    }
+    .fluent-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+    .fluent-btn:active {
+      background: rgba(255, 255, 255, 0.04);
+      transform: scale(0.99);
+    }
+    .fluent-btn-primary {
+      background: #0078d4;
+      border: 1px solid #118dff;
+      color: #ffffff;
+      transition: all 0.15s cubic-bezier(0, 0, 0, 1);
+    }
+    .fluent-btn-primary:hover {
+      background: #1084df;
+      box-shadow: 0 0 12px rgba(0, 120, 212, 0.45);
+    }
+    .fluent-btn-primary:active {
+      background: #006cbe;
+      transform: scale(0.99);
+    }
+    .fluent-segmented {
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 2px;
+      border-radius: 6px;
+    }
+    .fluent-seg-btn {
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: #adadad;
+      transition: all 0.12s ease-in-out;
+    }
+    .fluent-seg-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .fluent-seg-btn.active {
+      background: #0078d4;
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .fluent-subtle-btn {
+      color: #adadad;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+    }
+    .fluent-subtle-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: #ffffff;
+    }
+  </style>
+
+
+<!-- Windows 11 / Fluent 2 Navigation Rail -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-[#202020] border-r border-[rgba(255,255,255,0.08)] z-50 flex flex-col justify-between select-none">
+<div class="flex flex-col">
+<!-- App Header Bar with Mica feel -->
+<div class="h-14 flex items-center justify-between px-4 border-b border-[rgba(255,255,255,0.06)] bg-[#232323]">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-[5px] bg-[#0078d4] flex items-center justify-center text-white shadow-sm ring-1 ring-white/20">
+<span class="material-symbols-outlined text-[17px]">hub</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[13px] font-semibold text-white tracking-tight leading-snug">Synthetix</span>
+<span class="text-[10px] font-mono text-[#60cdff] uppercase tracking-wider leading-none">Factory OS</span>
+</div>
+</div>
+<button class="w-7 h-7 flex items-center justify-center rounded-[4px] text-on-surface-variant hover:bg-white/10 hover:text-white transition-colors" title="Toggle Sidebar">
+<span class="material-symbols-outlined text-[18px]">menu_open</span>
+</button>
+</div>
+<!-- Agent Cluster Info Badge -->
+<div class="mx-3 mt-3 px-3 py-2 rounded-fluent bg-[#282828] border border-[rgba(255,255,255,0.06)] flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase font-semibold text-on-surface-variant tracking-wider">Agent Fleet</span>
+<span class="text-[12px] font-medium text-white flex items-center gap-1.5 mt-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#13a10e] shadow-[0_0_6px_#13a10e]"></span>
+            6 Agents Active
+          </span>
+</div>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded-[4px] bg-[#0078d4]/20 text-[#60cdff] border border-[#0078d4]/30 font-semibold">v4.2 PROD</span>
+</div>
+<!-- Navigation Section -->
+<div class="px-4 pt-4 pb-1">
+<span class="text-[10px] font-bold text-on-surface-subtle uppercase tracking-wider">Orchestration</span>
+</div>
+<nav class="flex flex-col px-2 gap-1 text-[13px]">
+<a class="flex items-center gap-2.5 px-3 py-1.5 rounded-fluent text-on-surface-variant hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">grid_view</span>
+<span class="">Overview</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-1.5 rounded-fluent text-on-surface-variant hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">schema</span>
+<span class="">Mission Control</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-1.5 rounded-fluent text-on-surface-variant hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">table_chart_view</span>
+<span class="">Task Matrix</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-1.5 rounded-fluent text-on-surface-variant hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span class="">Quality &amp; Sandboxes</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-1.5 rounded-fluent bg-[#2e2e2e] text-white font-medium shadow-sm relative before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-[#0078d4] before:rounded-r-full" href="#">
+<span class="material-symbols-outlined text-[18px] text-[#2899f5]">tune</span>
+<span class="">Fleet &amp; Tuning</span>
+</a>
+</nav>
+</div>
+<!-- Sidebar Bottom Telemetry Dock -->
+<div class="p-3 border-t border-[rgba(255,255,255,0.06)] bg-[#1e1e1e] flex flex-col gap-2.5">
+<div class="p-2.5 rounded-fluent bg-[#262626] border border-[rgba(255,255,255,0.05)] flex flex-col gap-2">
+<div class="flex items-center justify-between text-[11px]">
+<span class="text-on-surface-variant font-medium">GPU Memory</span>
+<span class="font-mono font-semibold text-[#2899f5]">78%</span>
+</div>
+<!-- Fluent Progress Bar -->
+<div class="w-full h-1 bg-[#3a3a3a] rounded-full overflow-hidden">
+<div class="h-full bg-[#0078d4] rounded-full" style="width: 78%"></div>
+</div>
+<div class="flex items-center justify-between text-[11px] pt-1 border-t border-white/5">
+<span class="text-on-surface-variant">Context Hit</span>
+<span class="font-mono text-[#13a10e] font-medium">94%</span>
+</div>
+<div class="flex items-center justify-between text-[11px]">
+<span class="text-on-surface-variant">Throughput</span>
+<span class="font-mono text-[#60cdff] font-medium">4,120 T/s</span>
+</div>
+</div>
+<button class="w-full py-1.5 px-3 rounded-fluent bg-[#c42b1c]/15 text-[#ff6f61] hover:bg-[#c42b1c]/25 border border-[#c42b1c]/30 text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[16px]">power_settings_new</span>
+<span class="">Pause Pipeline</span>
+</button>
+</div>
+</aside>
+<!-- Main Canvas Container -->
+<div class="pl-64 flex-1 flex flex-col min-h-screen bg-[#1c1c1c]">
+<!-- Fluent Top Command Bar -->
+<header class="sticky top-0 h-14 bg-[#202020]/80 backdrop-blur-md border-b border-[rgba(255,255,255,0.08)] z-40 flex items-center justify-between px-6">
+<!-- Breadcrumbs & Status -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5 font-mono text-[12px] text-on-surface-variant">
+<span class="text-[#2899f5] font-semibold">synthetix</span>
+<span class="text-on-surface-subtle">/</span>
+<span class="">pipeline-prod</span>
+<span class="text-on-surface-subtle">/</span>
+<span class="text-white font-medium">orchestrator</span>
+</div>
+<div class="h-3.5 w-px bg-white/10 hidden md:block"></div>
+<div class="hidden md:flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] bg-[#13a10e]/15 text-[#13a10e] border border-[#13a10e]/25 text-[11px] font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-[#13a10e]"></span>
+<span class="">99.8% Test Pass</span>
+</div>
+</div>
+<!-- Search & User Profile -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 bg-[#282828] border border-[rgba(255,255,255,0.08)] px-2.5 py-1 rounded-fluent text-on-surface-variant focus-within:border-[#0078d4] focus-within:ring-1 focus-within:ring-[#0078d4] transition-all">
+<span class="material-symbols-outlined text-[16px] text-on-surface-subtle">search</span>
+<input class="bg-transparent text-[12px] text-white placeholder-on-surface-subtle focus:outline-none w-56" placeholder="Search pipelines, agents, diffs..." type="text">
+<kbd class="font-mono text-[10px] bg-white/10 px-1 py-0.2 rounded text-on-surface-variant">⌘K</kbd>
+</div>
+<button class="w-8 h-8 rounded-fluent flex items-center justify-center text-on-surface-variant hover:bg-white/5 hover:text-white transition-colors relative">
+<span class="material-symbols-outlined text-[19px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#0078d4]"></span>
+</button>
+<div class="h-4 w-px bg-white/10"></div>
+<div class="flex items-center gap-2 pl-1 cursor-pointer hover:opacity-90">
+<img alt="Alex Vance" class="w-7 h-7 rounded-full object-cover ring-1 ring-white/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTpp2t-3QU9PijHmWRR1vDBFTFkC_RWwxu2U7nmPgv830gHnTsrReY7vdGKjuAj-v9mnRh_gx2aw4AAigc-3y65jUaEEN6vZiney16WQ317hoQvQWcmy24WAE1FhoIjisfpJOLltR6E1gbyvaa5hXNadOvBasiBnRGRmUiLDYyZji1_fWgzeN91yyxzZv1X-IAyXVc6fszR5ceeblSKCLihlZYjedhTy2QyLXiUWUa08BfuWOwSdiF">
+<div class="hidden sm:flex flex-col text-left">
+<span class="text-[12px] font-semibold text-white leading-none">Alex Vance</span>
+<span class="text-[10px] text-on-surface-variant leading-tight mt-0.5">Staff Architect</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Workspace Content -->
+<main class="p-6 flex flex-col gap-6">
+<!-- Section: Key Metrics (Fluent KPI Cards) -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Card 1: Active Pipeline Specialists -->
+<div class="fluent-card p-4 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Specialists Online</span>
+<span class="flex items-center gap-1.5 text-[11px] font-mono font-medium text-[#13a10e]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#13a10e]"></span> 6 / 6 ONLINE
+              </span>
+</div>
+<div class="text-[20px] font-semibold text-white leading-tight">6 Pipeline Specialists</div>
+<div class="text-[11px] text-[#2899f5] font-mono font-medium mt-0.5">100% Pipeline Coverage</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-[rgba(255,255,255,0.06)] flex flex-col gap-1 text-[11px] font-mono">
+<div class="flex justify-between items-center text-on-surface-variant">
+<span class="">1. Arch &amp; Spec</span>
+<span class="text-white font-medium">Architect-Prime</span>
+</div>
+<div class="flex justify-between items-center text-on-surface-variant">
+<span class="">2. Code Synth</span>
+<span class="text-[#2899f5] font-medium">CodeCraft</span>
+</div>
+<div class="flex justify-between items-center text-on-surface-variant">
+<span class="">3. QA &amp; Verif</span>
+<span class="text-white font-medium">GateKeeper</span>
+</div>
+<div class="flex justify-between items-center text-on-surface-variant">
+<span class="">4. Sec &amp; Compl</span>
+<span class="text-[#13a10e] font-medium">SecOps-Vanguard</span>
+</div>
+</div>
+</div>
+<!-- Card 2: Token Consumption & Spend -->
+<div class="fluent-card p-4 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-[#2899f5]">toll</span>
+<span class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Token Consumption</span>
+</div>
+<span class="text-[11px] font-mono text-[#13a10e] flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#13a10e]"></span> Active
+              </span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-[22px] font-semibold text-white tracking-tight">18.4M</span>
+<span class="text-[11px] text-on-surface-variant">Total Consumed</span>
+</div>
+<div class="text-[11px] text-on-surface-variant flex justify-between mt-1 mb-2">
+<span class="">Billing Usage</span>
+<span class="font-mono text-[#2899f5] font-semibold">+2.1M (24h)</span>
+</div>
+<!-- Fluent Tri-Segmented Progress Bar -->
+<div class="w-full h-1.5 bg-[#333333] rounded-full overflow-hidden flex">
+<div class="bg-[#0078d4] h-full" style="width: 62%;" title="Claude 62%"></div>
+<div class="bg-[#2b88d8] h-full" style="width: 26%;" title="DeepSeek 26%"></div>
+<div class="bg-[#60cdff] h-full" style="width: 12%;" title="GPT-4o 12%"></div>
+</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-[rgba(255,255,255,0.06)] flex flex-col gap-1 text-[11px] font-mono">
+<div class="flex justify-between text-on-surface-variant">
+<span class="">Cap &amp; Spend</span>
+<span class="text-white font-medium">$3,680 <span class="text-on-surface-subtle">/ $5,000</span></span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span class="">Runway Est.</span>
+<span class="text-[#13a10e] font-medium">11d 4h <span class="text-on-surface-subtle">(-$420)</span></span>
+</div>
+</div>
+</div>
+<!-- Card 3: QA & Verification GateKeeper -->
+
+<!-- Card 4: SecOps Vanguard -->
+
+</section>
+<!-- Section: Agent Roster Hierarchy (Lead on Top, 5 Specialists in 2 Rows) -->
+<section class="fluent-card p-5 flex flex-col">
+<!-- Roster Header -->
+<div class="flex items-center justify-between pb-4 border-b border-[rgba(255,255,255,0.06)] mb-5">
+<div class="flex items-center gap-2.5">
+<span class="text-[14px] font-semibold text-white tracking-tight">Agent Team Architecture</span>
+<span class="text-[11px] font-mono px-2 py-0.5 rounded-[4px] bg-white/5 text-on-surface-variant border border-white/5">6 Dedicated Pipeline Specialists</span>
+</div>
+<div class="flex items-center gap-2">
+
+<button class="fluent-btn-primary px-3 py-1 rounded-fluent text-[12px] font-semibold flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[15px]">tune</span>
+<span class="">Configure Agents<br></span>
+</button>
+</div>
+</div>
+<!-- Hierarchical Lead Node: Architect-Prime -->
+<div class="w-full flex flex-col items-center">
+<div class="w-full max-w-xl fluent-card-elevated p-4 border border-[rgba(255,255,255,0.12)] relative">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-semibold px-2 py-0.5 rounded-[4px] bg-[#0078d4]/20 text-[#2899f5] border border-[#0078d4]/30 uppercase tracking-wider">
+                  Stage 1: Architecture &amp; Planning
+                </span>
+<span class="text-[11px] font-mono text-[#13a10e] flex items-center gap-1 font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-[#13a10e]"></span> ONLINE
+                </span>
+</div>
+<button class="fluent-subtle-btn px-2 py-0.5 text-[11px] flex items-center gap-1" onclick="openAgentDrawer('Architect-Prime', 'Chief Architect / Systems Lead', 'ACTIVE', 'fully-autonomous-internal')">
+<span class="">More</span>
+<span class="material-symbols-outlined text-[13px]">open_in_new</span>
+</button>
+</div>
+<div class="flex items-center gap-3.5">
+<div class="w-11 h-11 rounded-fluent bg-[#0078d4] text-white flex items-center justify-center font-bold text-[14px] shadow-sm ring-1 ring-white/20">
+                AP
+              </div>
+<div class="flex flex-col">
+<span class="text-[15px] font-semibold text-white">Architect-Prime</span>
+<span class="text-[11px] text-[#2899f5] font-medium">Chief Architect &amp; Systems Lead</span>
+</div>
+</div>
+<p class="text-[12px] text-on-surface-variant leading-relaxed mb-4">
+              Holds system topology, maintains one prioritized backlog, decomposes PRDs into task graphs, and routes signals to specialist agents. Directs, does not commit directly.
+            </p>
+<!-- Lead Controls: Model + Reasoning + Actions in Fluent Style -->
+<div class="p-2.5 rounded-fluent bg-[#222222] border border-white/5 flex flex-col gap-3.5 mb-4">
+<div>
+<div class="text-[10px] font-bold text-on-surface-subtle uppercase tracking-wider mb-1">Model</div>
+<div class="fluent-segmented grid grid-cols-4 text-center">
+<button class="fluent-seg-btn">Fable</button>
+<button class="fluent-seg-btn">Opus</button>
+<button class="fluent-seg-btn active">Sonnet</button>
+<button class="fluent-seg-btn">Haiku</button>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center text-[10px] font-bold text-on-surface-subtle uppercase tracking-wider mb-1">
+<span class="">Reasoning Effort</span>
+<span class="text-[#2899f5] font-mono font-normal">Medium</span>
+</div>
+<div class="fluent-segmented grid grid-cols-5 text-center">
+<button class="fluent-seg-btn">Low</button>
+<button class="fluent-seg-btn active">Medium</button>
+<button class="fluent-seg-btn">High</button>
+<button class="fluent-seg-btn">xHigh</button>
+<button class="fluent-seg-btn">Max</button>
+</div>
+</div>
+</div>
+<!-- Command Buttons -->
+<div class="flex items-center gap-2">
+<button class="fluent-btn-primary flex-1 py-1.5 rounded-fluent text-[12px] font-semibold flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[15px]">play_arrow</span>
+<span class="">Run now</span>
+</button>
+<button class="fluent-btn px-3 py-1.5 rounded-fluent text-[11px] text-on-surface-variant hover:text-white flex items-center justify-center gap-1">
+<span class="">Edit system prompt</span>
+<span class="material-symbols-outlined text-[14px]">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Fluent Hierarchy Connector Stems -->
+<div class="w-px h-6 bg-[rgba(255,255,255,0.15)]"></div>
+<div class="w-2/3 h-px bg-[rgba(255,255,255,0.15)] mb-5"></div>
+</div>
+<!-- 5 Specialist Agents Roster: Broken into 2 clean Fluent rows (Row 1: 3 agents, Row 2: 2 agents) -->
+<div class="flex flex-col gap-4">
+<!-- Specialist Row 1 (3 Agents: DocuForge, CodeCraft, GateKeeper) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Agent Card 1: DocuForge -->
+<div class="fluent-card p-3.5 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-fluent bg-[#13a10e]/20 text-[#13a10e] border border-[#13a10e]/30 flex items-center justify-center font-bold text-[11px]">DF</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-[12px] font-semibold text-white">DocuForge</span>
+<span class="text-[9px] px-1 py-0.2 rounded bg-white/5 font-mono text-on-surface-variant">Stage 5</span>
+</div>
+<div class="text-[10px] text-[#60cdff]">Docs &amp; DevEx Engineer</div>
+</div>
+</div>
+<button class="fluent-subtle-btn px-1 py-0.5 text-[10px] flex items-center gap-0.5" onclick="openAgentDrawer('DocuForge', 'Documentation &amp; Release Synthesizer', 'STANDBY', 'draft-and-queue')">
+<span class="">More</span>
+<span class="material-symbols-outlined text-[12px]">north_east</span>
+</button>
+</div>
+<p class="text-[11px] text-on-surface-variant leading-relaxed mb-3 min-h-[44px]">
+                  Generates API references, OpenAPI schemas, ADRs, and migration guides. Synthesizes PR summaries and developer release notes.
+                </p>
+</div>
+<div class="pt-2.5 border-t border-[rgba(255,255,255,0.06)] flex flex-col gap-2">
+<div class="flex items-center justify-between text-[10px] text-on-surface-subtle font-semibold uppercase">
+<span class="flex items-center gap-1 normal-case text-on-surface-variant"><span class="w-1.5 h-1.5 rounded-full bg-white/40"></span> away</span>
+<span class="">Model</span>
+</div>
+<div class="fluent-segmented grid grid-cols-4 text-center">
+<button class="fluent-seg-btn">Fable</button>
+<button class="fluent-seg-btn active">Opus</button>
+<button class="fluent-seg-btn">Sonnet</button>
+<button class="fluent-seg-btn">Haiku</button>
+</div>
+<div class="flex items-center justify-between text-[10px] text-on-surface-subtle">
+<span class="">Effort: <span class="text-[#2899f5] font-medium">Med</span></span>
+<div class="fluent-segmented flex text-center"><button class="fluent-seg-btn px-1.5">Low</button><button class="fluent-seg-btn active px-1.5">Med</button><button class="fluent-seg-btn px-1.5">High</button><button class="fluent-seg-btn px-1.5">xHigh</button><button class="fluent-seg-btn px-1.5">Max</button></div>
+</div>
+<button class="fluent-btn w-full py-1 rounded-fluent text-[11px] font-medium mt-1">Run now</button>
+<button class="text-[10px] text-on-surface-variant hover:text-white flex items-center justify-center gap-0.5">
+                  Edit system prompt <span class="material-symbols-outlined text-[12px]">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Agent Card 2: CodeCraft -->
+<div class="fluent-card p-3.5 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-fluent bg-[#0078d4]/20 text-[#2899f5] border border-[#0078d4]/30 flex items-center justify-center font-bold text-[11px]">CC</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-[12px] font-semibold text-white">CodeCraft</span>
+<span class="text-[9px] px-1 py-0.2 rounded bg-white/5 font-mono text-on-surface-variant">Stage 2</span>
+</div>
+<div class="text-[10px] text-[#2899f5]">Full-Stack Engineer</div>
+</div>
+</div>
+<button class="fluent-subtle-btn px-1 py-0.5 text-[10px] flex items-center gap-0.5" onclick="openAgentDrawer('CodeCraft', 'Code Synthesis Specialist', 'BUSY', 'propose-only')">
+<span class="">More</span>
+<span class="material-symbols-outlined text-[12px]">north_east</span>
+</button>
+</div>
+<p class="text-[11px] text-on-surface-variant leading-relaxed mb-3 min-h-[44px]">
+                  Generates idiomatic frontend &amp; backend code, scaffolds services against live contracts, and resolves complex merge conflicts.
+                </p>
+</div>
+<div class="pt-2.5 border-t border-[rgba(255,255,255,0.06)] flex flex-col gap-2">
+<div class="flex items-center justify-between text-[10px] text-on-surface-subtle font-semibold uppercase">
+<span class="flex items-center gap-1 normal-case text-on-surface-variant"><span class="w-1.5 h-1.5 rounded-full bg-white/40"></span> away</span>
+<span class="">Model</span>
+</div>
+<div class="fluent-segmented grid grid-cols-4 text-center">
+<button class="fluent-seg-btn">Fable</button>
+<button class="fluent-seg-btn active">Opus</button>
+<button class="fluent-seg-btn">Sonnet</button>
+<button class="fluent-seg-btn">Haiku</button>
+</div>
+<div class="flex items-center justify-between text-[10px] text-on-surface-subtle">
+<span class="">Effort: <span class="text-[#2899f5] font-medium">High</span></span>
+<div class="fluent-segmented flex text-center"><button class="fluent-seg-btn px-1.5">Low</button><button class="fluent-seg-btn px-1.5">Med</button><button class="fluent-seg-btn active px-1.5">High</button><button class="fluent-seg-btn px-1.5">xHigh</button><button class="fluent-seg-btn px-1.5">Max</button></div>
+</div>
+<button class="fluent-btn w-full py-1 rounded-fluent text-[11px] font-medium mt-1">Run now</button>
+<button class="text-[10px] text-on-surface-variant hover:text-white flex items-center justify-center gap-0.5">
+                  Edit system prompt <span class="material-symbols-outlined text-[12px]">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Agent Card 3: GateKeeper -->
+<div class="fluent-card p-3.5 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-fluent bg-[#2b3b52] text-[#9bb5d9] border border-white/10 flex items-center justify-center font-bold text-[11px]">GK</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-[12px] font-semibold text-white">GateKeeper</span>
+<span class="text-[9px] px-1 py-0.2 rounded bg-white/5 font-mono text-on-surface-variant">Stage 3</span>
+</div>
+<div class="text-[10px] text-[#9bb5d9]">QA &amp; Verification Engineer</div>
+</div>
+</div>
+<button class="fluent-subtle-btn px-1 py-0.5 text-[10px] flex items-center gap-0.5" onclick="openAgentDrawer('GateKeeper', 'QA &amp; Verification Specialist', 'STANDBY', 'draft-and-queue')">
+<span class="">More</span>
+<span class="material-symbols-outlined text-[12px]">north_east</span>
+</button>
+</div>
+<p class="text-[11px] text-on-surface-variant leading-relaxed mb-3 min-h-[44px]">
+                  Authors unit &amp; integration test matrices, runs regression suites in ephemeral sandboxes, and verifies Playwright E2E suites before promotion.
+                </p>
+</div>
+<div class="pt-2.5 border-t border-[rgba(255,255,255,0.06)] flex flex-col gap-2">
+<div class="flex items-center justify-between text-[10px] text-on-surface-subtle font-semibold uppercase">
+<span class="flex items-center gap-1 normal-case text-on-surface-variant"><span class="w-1.5 h-1.5 rounded-full bg-white/40"></span> away</span>
+<span class="">Model</span>
+</div>
+<div class="fluent-segmented grid grid-cols-4 text-center">
+<button class="fluent-seg-btn">Fable</button>
+<button class="fluent-seg-btn">Opus</button>
+<button class="fluent-seg-btn active">Sonnet</button>
+<button class="fluent-seg-btn">Haiku</button>
+</div>
+<div class="flex items-center justify-between text-[10px] text-on-surface-subtle">
+<span class="">Effort: <span class="text-[#2899f5] font-medium">Med</span></span>
+<div class="fluent-segmented flex text-center"><button class="fluent-seg-btn px-1.5">Low</button><button class="fluent-seg-btn active px-1.5">Med</button><button class="fluent-seg-btn px-1.5">High</button><button class="fluent-seg-btn px-1.5">xHigh</button><button class="fluent-seg-btn px-1.5">Max</button></div>
+</div>
+<button class="fluent-btn w-full py-1 rounded-fluent text-[11px] font-medium mt-1">Run now</button>
+<button class="text-[10px] text-on-surface-variant hover:text-white flex items-center justify-center gap-0.5">
+                  Edit system prompt <span class="material-symbols-outlined text-[12px]">expand_more</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Specialist Row 2 (2 Agents: SecOps-Vanguard, SentryWatch) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Agent Card 4: SecOps-Vanguard -->
+<div class="fluent-card p-3.5 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-fluent bg-[#1e3a2b] text-[#60cdff] border border-white/10 flex items-center justify-center font-bold text-[11px]">SV</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-[12px] font-semibold text-white">SecOps-Vanguard</span>
+<span class="text-[9px] px-1 py-0.2 rounded bg-white/5 font-mono text-on-surface-variant">Stage 4</span>
+</div>
+<div class="text-[10px] text-[#60cdff]">Security &amp; Compliance Engineer</div>
+</div>
+</div>
+<button class="fluent-subtle-btn px-1 py-0.5 text-[10px] flex items-center gap-0.5" onclick="openAgentDrawer('SecOps-Vanguard', 'Security &amp; Compliance Specialist', 'ACTIVE', 'fully-autonomous-internal')">
+<span class="">More</span>
+<span class="material-symbols-outlined text-[12px]">north_east</span>
+</button>
+</div>
+<p class="text-[11px] text-on-surface-variant leading-relaxed mb-3">
+                  Audits AST diffs, enforces Semgrep/SAST rules, audits dependency supply chain risks, and scans cryptographic boundaries. Full autonomy on CVE blocking.
+                </p>
+</div>
+<div class="pt-2.5 border-t border-[rgba(255,255,255,0.06)] flex flex-col gap-2">
+<div class="flex items-center justify-between text-[10px] text-on-surface-subtle font-semibold uppercase">
+<span class="flex items-center gap-1 normal-case text-on-surface-variant"><span class="w-1.5 h-1.5 rounded-full bg-white/40"></span> away</span>
+<span class="">Model</span>
+</div>
+<div class="fluent-segmented grid grid-cols-4 text-center">
+<button class="fluent-seg-btn">Fable</button>
+<button class="fluent-seg-btn">Opus</button>
+<button class="fluent-seg-btn active">Sonnet</button>
+<button class="fluent-seg-btn">Haiku</button>
+</div>
+<div class="flex items-center justify-between text-[10px] text-on-surface-subtle">
+<span class="">Effort: <span class="text-[#2899f5] font-medium">High</span></span>
+<div class="fluent-segmented flex text-center"><button class="fluent-seg-btn px-1.5">Low</button><button class="fluent-seg-btn px-1.5">Med</button><button class="fluent-seg-btn active px-1.5">High</button><button class="fluent-seg-btn px-1.5">xHigh</button><button class="fluent-seg-btn px-1.5">Max</button></div>
+</div>
+<button class="fluent-btn w-full py-1 rounded-fluent text-[11px] font-medium mt-1">Run now</button>
+<button class="text-[10px] text-on-surface-variant hover:text-white flex items-center justify-center gap-0.5">
+                  Edit system prompt <span class="material-symbols-outlined text-[12px]">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Agent Card 5: SentryWatch -->
+<div class="fluent-card p-3.5 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-fluent bg-[#0078d4]/20 text-[#2899f5] border border-[#0078d4]/30 flex items-center justify-center font-bold text-[11px]">SW</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-[12px] font-semibold text-white">SentryWatch</span>
+<span class="text-[9px] px-1 py-0.2 rounded bg-white/5 font-mono text-on-surface-variant">Stage 6</span>
+</div>
+<div class="text-[10px] text-[#2899f5]">Observability &amp; Reliability Analyst</div>
+</div>
+</div>
+<button class="fluent-subtle-btn px-1 py-0.5 text-[10px] flex items-center gap-0.5" onclick="openAgentDrawer('SentryWatch', 'Observability &amp; Reliability Intelligence Specialist', 'ACTIVE', 'fully-autonomous-internal')">
+<span class="">More</span>
+<span class="material-symbols-outlined text-[12px]">north_east</span>
+</button>
+</div>
+<p class="text-[11px] text-on-surface-variant leading-relaxed mb-3">
+                  Continuously monitors Datadog, Grafana, Sentry &amp; cloud telemetry. Detects anomalies, auto-triages regressions, and generates diagnostic reports.
+                </p>
+</div>
+<div class="pt-2.5 border-t border-[rgba(255,255,255,0.06)] flex flex-col gap-2">
+<div class="flex items-center justify-between text-[10px] text-on-surface-subtle font-semibold uppercase">
+<span class="flex items-center gap-1 normal-case text-[#13a10e] font-mono"><span class="w-1.5 h-1.5 rounded-full bg-[#13a10e]"></span> online</span>
+<span class="">Model</span>
+</div>
+<div class="fluent-segmented grid grid-cols-4 text-center">
+<button class="fluent-seg-btn">Fable</button>
+<button class="fluent-seg-btn">Opus</button>
+<button class="fluent-seg-btn active">Sonnet</button>
+<button class="fluent-seg-btn">Haiku</button>
+</div>
+<div class="flex items-center justify-between text-[10px] text-on-surface-subtle">
+<span class="">Effort: <span class="text-[#2899f5] font-medium">Med</span></span>
+<div class="fluent-segmented flex text-center"><button class="fluent-seg-btn px-1.5">Low</button><button class="fluent-seg-btn active px-1.5">Med</button><button class="fluent-seg-btn px-1.5">High</button><button class="fluent-seg-btn px-1.5">xHigh</button><button class="fluent-seg-btn px-1.5">Max</button></div>
+</div>
+<button class="fluent-btn w-full py-1 rounded-fluent text-[11px] font-medium mt-1">Run now</button>
+<button class="text-[10px] text-on-surface-variant hover:text-white flex items-center justify-center gap-0.5">
+                  Edit system prompt <span class="material-symbols-outlined text-[12px]">expand_more</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: 24h Pipeline Token Consumption Chart -->
+<section class="fluent-card p-5">
+<div class="flex items-center justify-between mb-4">
+<div>
+<span class="text-[10px] font-semibold text-on-surface-subtle uppercase tracking-wider block">24h Ingestion</span>
+<span class="text-[16px] font-semibold text-white tracking-tight">Pipeline Token Consumption</span>
+</div>
+<span class="text-[13px] font-mono text-[#2899f5] font-semibold bg-[#0078d4]/10 px-2.5 py-1 rounded-fluent border border-[#0078d4]/20">18.4M Tkns</span>
+</div>
+<!-- Fluent Smooth Stacked Area SVG Chart -->
+<div class="w-full h-36 relative flex items-end">
+<svg class="w-full h-full overflow-visible" fill="none" preserveAspectRatio="none" viewBox="0 0 300 90">
+<defs>
+<linearGradient id="fluentBlueArea" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#0078d4" stop-opacity="0.45"></stop>
+<stop offset="100%" stop-color="#0078d4" stop-opacity="0.02"></stop>
+</linearGradient>
+<linearGradient id="fluentSecondaryArea" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#2899f5" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#2899f5" stop-opacity="0.01"></stop>
+</linearGradient>
+</defs>
+<!-- Secondary Area (DeepSeek) -->
+<path d="M0,75 Q40,65 80,70 T160,50 T240,60 T300,45 L300,90 L0,90 Z" fill="url(#fluentSecondaryArea)"></path>
+<!-- Primary Area (Claude) -->
+<path d="M0,60 Q50,45 100,55 T200,30 T270,35 T300,20 L300,90 L0,90 Z" fill="url(#fluentBlueArea)"></path>
+<path d="M0,60 Q50,45 100,55 T200,30 T270,35 T300,20" stroke="#2899f5" stroke-linecap="round" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Time Ticks -->
+<div class="w-full flex justify-between items-center pt-2 border-t border-[rgba(255,255,255,0.06)] px-2 font-mono text-[10px] text-on-surface-subtle">
+<span class="">00:00</span>
+<span class="">03:00</span>
+<span class="">06:00</span>
+<span class="">09:00</span>
+<span class="text-[#2899f5] font-semibold">12:00</span>
+<span class="">15:00</span>
+<span class="">18:00</span>
+<span class="">21:00</span>
+<span class="">24:00</span>
+</div>
+<!-- Legend -->
+<div class="flex items-center justify-between mt-3 pt-2.5 border-t border-[rgba(255,255,255,0.06)] text-[11px]">
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1.5 text-white">
+<span class="w-2.5 h-2.5 rounded-[2px] bg-[#0078d4]"></span> Claude (62%)
+            </span>
+<span class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-2.5 h-2.5 rounded-[2px] bg-[#2899f5]"></span> DeepSeek (26%)
+            </span>
+<span class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-2.5 h-2.5 rounded-[2px] bg-[#60cdff]"></span> GPT-4o (12%)
+            </span>
+</div>
+<span class="text-on-surface-subtle text-[10px] font-mono">Sampling Window: Live 24h Continuous</span>
+</div>
+</section>
+</main>
+</div>
+<script>
+    function openAgentDrawer(name, role, status, autonomy) {
+      console.log('Selected Fluent Agent:', name, role, status, autonomy);
+    }
+  </script>
+
+
+
+
+
+
+</body></html>

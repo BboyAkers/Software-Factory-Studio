@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Synthetix Factory OS - Pipeline Budget &amp; Spend Allocation</title>
+<!-- Google Fonts: Segoe UI Variable fallback & Cascadia Code -->
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#1e1e1e",
+            "surface-dim": "#141414",
+            "surface-card": "#242424",
+            "surface-container": "#202020",
+            "surface-container-high": "#282828",
+            "surface-container-highest": "#333333",
+            "fluent-blue": "#0078d4",
+            "fluent-blue-hover": "#118dff",
+            "fluent-blue-light": "#2899f5",
+            "fluent-teal": "#13a10e",
+            "fluent-border": "rgba(255, 255, 255, 0.08)",
+            "on-surface": "#f3f3f3",
+            "on-surface-variant": "#adadad",
+            "on-surface-subtle": "#777777"
+          },
+          fontFamily: {
+            sans: [
+              "-apple-system",
+              "BlinkMacSystemFont",
+              "Segoe UI Variable Text",
+              "Segoe UI Variable Display",
+              "Segoe UI",
+              "system-ui",
+              "sans-serif"
+            ],
+            mono: [
+              "Cascadia Code",
+              "JetBrains Mono",
+              "Consolas",
+              "monospace"
+            ]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        background-color: #1a1a1a;
+        color: #f3f3f3;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+      }
+    }
+
+    /* Fluent 2 Acrylic & Materials */
+    .fluent-modal-panel {
+      background: #242426;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.65), 0 4px 16px rgba(0, 0, 0, 0.45);
+      border-radius: 10px;
+    }
+
+    .fluent-card {
+      background: #242424;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.24);
+      border-radius: 8px;
+    }
+
+    .fluent-card-elevated {
+      background: #2a2a2a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      border-radius: 8px;
+    }
+
+    .fluent-btn-default {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #f3f3f3;
+      transition: all 0.15s cubic-bezier(0, 0, 0, 1);
+    }
+    .fluent-btn-default:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+    }
+
+    .fluent-btn-primary {
+      background: #118dff;
+      border: 1px solid #2899f5;
+      color: #ffffff;
+      transition: all 0.15s cubic-bezier(0, 0, 0, 1);
+    }
+    .fluent-btn-primary:hover {
+      background: #2899f5;
+      box-shadow: 0 0 12px rgba(17, 141, 255, 0.4);
+    }
+
+    /* Range slider custom styling */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type=range]:focus {
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 3px solid #118dff;
+      cursor: pointer;
+      margin-top: -5px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+      transition: transform 0.1s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+    .coral-slider::-webkit-slider-thumb {
+      border-color: #ff6f61 !important;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 6px;
+      cursor: pointer;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-[#1a1a1a] text-on-surface antialiased flex selection:bg-fluent-blue selection:text-white min-h-screen relative overflow-x-hidden">
+<!-- ================= BACKGROUND WORKSPACE: FLEET OPERATIONS & MODEL TUNING ================= -->
+<!-- Windows 11 / Fluent 2 Navigation Rail -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-[#202020] border-r border-[rgba(255,255,255,0.08)] z-30 flex flex-col justify-between select-none">
+<div class="flex flex-col">
+<!-- App Header Bar with Mica feel -->
+<div class="h-14 flex items-center justify-between px-4 border-b border-[rgba(255,255,255,0.06)] bg-[#232323]">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-[5px] bg-[#0078d4] flex items-center justify-center text-white shadow-sm ring-1 ring-white/20">
+<span class="material-symbols-outlined text-[17px]">hub</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[13px] font-semibold text-white tracking-tight leading-snug">Synthetix</span>
+<span class="text-[10px] font-mono text-[#60cdff] uppercase tracking-wider leading-none">Factory OS</span>
+</div>
+</div>
+<button class="w-7 h-7 flex items-center justify-center rounded text-on-surface-variant hover:bg-white/10 hover:text-white transition-colors" title="Toggle Sidebar">
+<span class="material-symbols-outlined text-[18px]">menu_open</span>
+</button>
+</div>
+<!-- Agent Cluster Info Badge -->
+<div class="mx-3 mt-3 px-3 py-2 rounded bg-[#282828] border border-[rgba(255,255,255,0.06)] flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-[10px] uppercase font-semibold text-on-surface-variant tracking-wider">Agent Fleet</span>
+<span class="text-[12px] font-medium text-white flex items-center gap-1.5 mt-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#13a10e] shadow-[0_0_6px_#13a10e]"></span>
+            6 Active Specialists - Optimal
+          </span>
+</div>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#0078d4]/20 text-[#60cdff] border border-[#0078d4]/30 font-semibold">v4.2 PROD</span>
+</div>
+<!-- Navigation Section -->
+<div class="px-4 pt-4 pb-1">
+<span class="text-[10px] font-bold text-on-surface-subtle uppercase tracking-wider">Orchestration</span>
+</div>
+<nav class="flex flex-col px-2 gap-1 text-[13px]">
+<a class="flex items-center gap-2.5 px-3 py-1.5 rounded text-on-surface-variant hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">grid_view</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-1.5 rounded text-on-surface-variant hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">schema</span>
+<span>Mission Control</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-1.5 rounded text-on-surface-variant hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">table_chart_view</span>
+<span>Task Matrix</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-1.5 rounded text-on-surface-variant hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span>Quality &amp; Sandboxes</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-1.5 rounded bg-[#2e2e2e] text-white font-medium shadow-sm relative before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:bg-[#0078d4] before:rounded-r-full" href="#">
+<span class="material-symbols-outlined text-[18px] text-[#2899f5]">tune</span>
+<span>Fleet &amp; Tuning</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-1.5 rounded text-on-surface-variant hover:bg-white/5 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Sidebar Bottom Telemetry Dock -->
+<div class="p-3 border-t border-[rgba(255,255,255,0.06)] bg-[#1e1e1e] flex flex-col gap-2.5">
+<div class="p-2.5 rounded bg-[#262626] border border-[rgba(255,255,255,0.05)] flex flex-col gap-2">
+<div class="flex items-center justify-between text-[11px]">
+<span class="text-on-surface-variant font-medium">GPU Memory</span>
+<span class="font-mono font-semibold text-[#2899f5]">78%</span>
+</div>
+<div class="w-full h-1 bg-[#3a3a3a] rounded-full overflow-hidden">
+<div class="h-full bg-[#0078d4] rounded-full" style="width: 78%"></div>
+</div>
+<div class="flex items-center justify-between text-[11px] pt-1 border-t border-white/5">
+<span class="text-on-surface-variant">Context Hit</span>
+<span class="font-mono text-[#13a10e] font-medium">94%</span>
+</div>
+<div class="flex items-center justify-between text-[11px]">
+<span class="text-on-surface-variant">Throughput</span>
+<span class="font-mono text-[#60cdff] font-medium">4,120 T/s</span>
+</div>
+</div>
+<button class="w-full py-1.5 px-3 rounded bg-[#c42b1c]/15 text-[#ff6f61] hover:bg-[#c42b1c]/25 border border-[#c42b1c]/30 text-[12px] font-semibold flex items-center justify-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[16px]">power_settings_new</span>
+<span>Pause Pipeline</span>
+</button>
+</div>
+</aside>
+<!-- Main Workspace Behind Modal -->
+<div class="pl-64 flex-1 flex flex-col min-h-screen bg-[#1c1c1c] filter blur-[2px] opacity-40 pointer-events-none select-none">
+<!-- Fluent Top Command Bar -->
+<header class="sticky top-0 h-14 bg-[#202020]/80 border-b border-[rgba(255,255,255,0.08)] z-20 flex items-center justify-between px-6">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5 font-mono text-[12px] text-on-surface-variant">
+<span class="text-[#2899f5] font-semibold">synthetix</span>
+<span class="text-on-surface-subtle">/</span>
+<span>pipeline-prod</span>
+<span class="text-on-surface-subtle">/</span>
+<span class="text-white font-medium">orchestrator</span>
+</div>
+<div class="h-3.5 w-px bg-white/10 hidden md:block"></div>
+<div class="hidden md:flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#13a10e]/15 text-[#13a10e] border border-[#13a10e]/25 text-[11px] font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-[#13a10e]"></span>
+<span>99.8% Test Pass</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 bg-[#282828] border border-[rgba(255,255,255,0.08)] px-2.5 py-1 rounded text-on-surface-variant w-56">
+<span class="material-symbols-outlined text-[16px] text-on-surface-subtle">search</span>
+<span class="text-[12px] text-on-surface-subtle">Search pipelines...</span>
+<kbd class="font-mono text-[10px] bg-white/10 px-1 py-0.2 rounded ml-auto">⌘K</kbd>
+</div>
+<div class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[19px]">notifications</span>
+</div>
+<div class="h-4 w-px bg-white/10"></div>
+<div class="flex items-center gap-2 pl-1">
+<img alt="Alex Vance" class="w-7 h-7 rounded-full object-cover ring-1 ring-white/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTpp2t-3QU9PijHmWRR1vDBFTFkC_RWwxu2U7nmPgv830gHnTsrReY7vdGKjuAj-v9mnRh_gx2aw4AAigc-3y65jUaEEN6vZiney16WQ317hoQvQWcmy24WAE1FhoIjisfpJOLltR6E1gbyvaa5hXNadOvBasiBnRGRmUiLDYyZji1_fWgzeN91yyxzZv1X-IAyXVc6fszR5ceeblSKCLihlZYjedhTy2QyLXiUWUa08BfuWOwSdiF"/>
+<div class="hidden sm:flex flex-col text-left">
+<span class="text-[12px] font-semibold text-white leading-none">Alex Vance</span>
+<span class="text-[10px] text-on-surface-variant leading-tight mt-0.5">Staff Architect</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Workspace Content (Simulated) -->
+<main class="p-6 flex flex-col gap-6">
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="fluent-card p-4">
+<div class="text-[11px] font-semibold text-on-surface-variant uppercase">Specialists Online</div>
+<div class="text-[20px] font-semibold text-white mt-1">6 Pipeline Specialists</div>
+</div>
+<div class="fluent-card p-4">
+<div class="text-[11px] font-semibold text-on-surface-variant uppercase">Token Consumption</div>
+<div class="text-[22px] font-semibold text-white mt-1">18.4M Total</div>
+</div>
+<div class="fluent-card p-4">
+<div class="text-[11px] font-semibold text-on-surface-variant uppercase">QA Verification</div>
+<div class="text-[20px] font-semibold text-white mt-1">GateKeeper Active</div>
+</div>
+<div class="fluent-card p-4">
+<div class="text-[11px] font-semibold text-on-surface-variant uppercase">SecOps Vanguard</div>
+<div class="text-[20px] font-semibold text-white mt-1">0 CVEs Flagged</div>
+</div>
+</section>
+<!-- Agent Architecture Card -->
+<section class="fluent-card p-5">
+<div class="text-[14px] font-semibold text-white mb-4">Agent Team Architecture</div>
+<div class="w-full max-w-xl mx-auto fluent-card-elevated p-4">
+<div class="text-[15px] font-semibold text-white">Architect-Prime</div>
+<div class="text-[11px] text-[#2899f5]">Chief Architect &amp; Systems Lead</div>
+</div>
+</section>
+<!-- Token Chart -->
+<section class="fluent-card p-5">
+<div class="text-[16px] font-semibold text-white">Pipeline Token Consumption (24h)</div>
+<div class="w-full h-24 bg-white/5 rounded mt-3"></div>
+</section>
+</main>
+</div>
+<!-- ================= FLUENT 2 DIALOG OVERLAY: PIPELINE BUDGET & SPEND ALLOCATION ================= -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-[8px]" id="fluent-budget-modal">
+<div class="relative w-full max-w-[650px] fluent-modal-panel overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150">
+<!-- Modal Header -->
+<div class="flex items-start justify-between px-6 py-4 bg-[#28282b] border-b border-[rgba(255,255,255,0.08)]">
+<div class="flex items-start gap-3.5">
+<!-- Fluent Blue square badge with money / wallet icon -->
+<div class="w-9 h-9 rounded bg-[#0078d4]/20 text-[#2899f5] border border-[#0078d4]/35 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<h2 class="text-[16px] font-semibold text-white tracking-tight leading-snug">Pipeline Budget &amp; Spend Allocation</h2>
+<p class="text-[12px] text-on-surface-variant leading-relaxed">
+              Configure monthly compute spend caps, token consumption quotas, and soft/hard alert limits for the AI agent fleet.
+            </p>
+</div>
+</div>
+<!-- Close '✕' Button -->
+<button class="w-7 h-7 rounded-[4px] flex items-center justify-center text-on-surface-variant hover:text-white hover:bg-white/10 transition-colors ml-3 flex-shrink-0" onclick="document.getElementById('fluent-budget-modal').remove()" title="Close dialog">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Modal Body (Acrylic Content Area) -->
+<div class="p-6 flex flex-col gap-5 max-h-[80vh] overflow-y-auto bg-[#202022]">
+<!-- SECTION 1: MONTHLY SPEND LIMIT -->
+<div class="p-4 rounded-lg bg-[#27272a] border border-[rgba(255,255,255,0.08)] flex flex-col gap-3 shadow-sm">
+<!-- Header & Runway Pill -->
+<div class="flex items-center justify-between">
+<label class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Monthly Spend Limit</label>
+<span class="font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-[#13a10e]/15 text-[#13a10e] border border-[#13a10e]/30 flex items-center gap-1.5 font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-[#13a10e]"></span>
+              Runway ~11d 4h
+            </span>
+</div>
+<!-- Amount Input Box -->
+<div class="flex items-center bg-[#18181a] rounded-[5px] border border-[rgba(255,255,255,0.12)] focus-within:border-[#118dff] focus-within:ring-1 focus-within:ring-[#118dff] transition-all px-3 py-2">
+<span class="text-[#2899f5] font-semibold text-[18px] mr-1.5 select-none">$</span>
+<input class="w-full bg-transparent font-mono text-[18px] text-white font-bold focus:outline-none tracking-tight tabular-nums" type="text" value="5,000"/>
+<span class="font-mono text-[12px] text-on-surface-subtle pl-2 whitespace-nowrap select-none">/ month</span>
+</div>
+<!-- Spend Stats Row -->
+<div class="flex flex-col gap-1.5 pt-0.5">
+<div class="flex items-center justify-between text-[11.5px] font-mono text-on-surface-variant">
+<span>Current Spend: <strong class="text-white font-semibold">$3,680</strong> (73.6%)</span>
+<span class="text-[#2899f5]">Est. End-of-Month: $4,910</span>
+</div>
+<!-- Progress Bar (73.6% in Fluent Blue) -->
+<div class="w-full h-2 bg-white/10 rounded-full overflow-hidden flex">
+<div class="bg-[#118dff] h-full rounded-full transition-all duration-300" style="width: 73.6%"></div>
+</div>
+</div>
+</div>
+<!-- SECTION 2: AUTONOMY SAFEGUARDS & ALERT THRESHOLDS -->
+<div class="p-4 rounded-lg bg-[#27272a] border border-[rgba(255,255,255,0.08)] flex flex-col gap-3.5 shadow-sm">
+<!-- Section Title with Shield Icon & Policy Tag -->
+<div class="flex items-center justify-between pb-2 border-b border-[rgba(255,255,255,0.08)]">
+<span class="text-[11px] font-semibold text-white/90 uppercase tracking-wider flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-[#2899f5]">shield</span>
+              Autonomy Safeguards &amp; Alert Thresholds
+            </span>
+<span class="font-mono text-[10px] px-2 py-0.5 rounded-[4px] bg-[#13a10e]/15 text-[#13a10e] border border-[#13a10e]/25 font-semibold uppercase tracking-wider">
+              Active Policy
+            </span>
+</div>
+<div class="flex flex-col gap-3.5">
+<!-- 2A. Soft Limit Alert Item -->
+<div class="p-3.5 rounded bg-[#202022] border border-[rgba(255,255,255,0.07)] flex flex-col gap-2.5">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#118dff] shadow-[0_0_6px_#118dff]"></span>
+<span class="text-[13px] font-semibold text-white">Soft Limit Alert</span>
+</div>
+<!-- Inputs: $4,000 and 80 % -->
+<div class="flex items-center gap-2 font-mono text-[12px]">
+<span class="text-[#2899f5] font-semibold bg-[#0078d4]/15 px-2.5 py-0.5 rounded-[4px] border border-[#0078d4]/30" id="soft-limit-dollar">$4,000</span>
+<div class="relative flex items-center bg-[#161618] border border-[rgba(255,255,255,0.12)] rounded-[4px] px-2 py-0.5 focus-within:border-[#118dff]">
+<input class="w-9 bg-transparent text-right pr-3.5 font-mono text-[12px] text-white font-semibold focus:outline-none tabular-nums" id="soft-limit-input" max="100" min="50" oninput="updateSoft(this.value)" step="1" type="number" value="80"/>
+<span class="absolute right-1.5 text-on-surface-subtle text-[11px] pointer-events-none">%</span>
+</div>
+</div>
+</div>
+<p class="text-[11px] text-on-surface-variant leading-relaxed">
+                Sends instant webhook ping to <span class="font-mono text-white/90 bg-white/5 px-1 py-0.5 rounded">#eng-ops-synthetix</span> on Slack and alerts team leads. Fleet remains autonomous.
+              </p>
+<!-- Slider & Tick labels -->
+<div class="flex flex-col gap-1.5 pt-1">
+<div class="relative w-full flex items-center">
+<div class="absolute left-0 right-0 h-1.5 bg-[#333336] rounded-full overflow-hidden">
+<div class="h-full bg-[#118dff] rounded-full" id="soft-track-fill" style="width: 80%"></div>
+</div>
+<input class="w-full h-1.5 appearance-none cursor-pointer relative z-10" id="soft-limit-slider" max="100" min="50" oninput="updateSoft(this.value)" type="range" value="80"/>
+</div>
+<div class="flex justify-between items-center text-[10px] font-mono text-on-surface-subtle px-0.5 pt-0.5">
+<span>50% ($2,500)</span>
+<span>75% ($3,750)</span>
+<span class="text-[#2899f5] font-semibold" id="soft-limit-label-badge">80% ($4,000)</span>
+<span>100% ($5,000)</span>
+</div>
+</div>
+</div>
+<!-- 2B. Hard Cap Safeguard Item -->
+<div class="p-3.5 rounded bg-[#202022] border border-[rgba(255,255,255,0.07)] flex flex-col gap-2.5">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#ff6f61] shadow-[0_0_6px_#ff6f61]"></span>
+<span class="text-[13px] font-semibold text-white">Hard Cap Safeguard</span>
+</div>
+<!-- Inputs: $5,000 and 100 % -->
+<div class="flex items-center gap-2 font-mono text-[12px]">
+<span class="text-[#ff6f61] font-semibold bg-[#ff6f61]/15 px-2.5 py-0.5 rounded-[4px] border border-[#ff6f61]/30" id="hard-cap-dollar">$5,000</span>
+<div class="relative flex items-center bg-[#161618] border border-[rgba(255,255,255,0.12)] rounded-[4px] px-2 py-0.5 focus-within:border-[#ff6f61]">
+<input class="w-9 bg-transparent text-right pr-3.5 font-mono text-[12px] text-white font-semibold focus:outline-none tabular-nums" id="hard-cap-input" max="120" min="70" oninput="updateHard(this.value)" step="1" type="number" value="100"/>
+<span class="absolute right-1.5 text-on-surface-subtle text-[11px] pointer-events-none">%</span>
+</div>
+</div>
+</div>
+<p class="text-[11px] text-on-surface-variant leading-relaxed">
+                Automatically pauses background refactoring agents and throttles CodeCraft &amp; DocuForge to Haiku fallback.
+              </p>
+<!-- Slider & Tick labels -->
+<div class="flex flex-col gap-1.5 pt-1">
+<div class="relative w-full flex items-center">
+<div class="absolute left-0 right-0 h-1.5 bg-[#333336] rounded-full overflow-hidden">
+<div class="h-full bg-[#ff6f61] rounded-full" id="hard-track-fill" style="width: 60%"></div>
+</div>
+<input class="w-full h-1.5 appearance-none cursor-pointer relative z-10 coral-slider" id="hard-cap-slider" max="120" min="70" oninput="updateHard(this.value)" type="range" value="100"/>
+</div>
+<div class="flex justify-between items-center text-[10px] font-mono text-on-surface-subtle px-0.5 pt-0.5">
+<span>70% ($3,500)</span>
+<span class="text-[#ff6f61] font-semibold" id="hard-cap-label-badge">100% ($5,000)</span>
+<span>120% ($6,000)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="flex items-center justify-between px-6 py-3.5 bg-[#28282b] border-t border-[rgba(255,255,255,0.08)]">
+<!-- Left Info Note -->
+<div class="flex items-center gap-1.5 text-on-surface-variant font-mono text-[11px]">
+<span class="material-symbols-outlined text-[15px] text-[#13a10e]">sync</span>
+<span>Changes take effect on the next dispatch cycle (~12s)</span>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-2.5">
+<button class="fluent-btn-default px-4 py-2 rounded-[4px] text-[12px] font-medium" onclick="document.getElementById('fluent-budget-modal').remove()">
+            Cancel
+          </button>
+<button class="fluent-btn-primary px-4 py-2 rounded-[4px] text-[12px] font-medium flex items-center gap-1.5 shadow-sm" onclick="document.getElementById('fluent-budget-modal').remove()">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>Save &amp; Apply Budget</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+    function updateSoft(val) {
+      val = Math.max(50, Math.min(100, Number(val)));
+      document.getElementById('soft-limit-input').value = val;
+      document.getElementById('soft-limit-slider').value = val;
+      const dollar = Math.round(5000 * (val / 100));
+      document.getElementById('soft-limit-dollar').innerText = '$' + dollar.toLocaleString();
+      document.getElementById('soft-limit-label-badge').innerText = val + '% ($' + dollar.toLocaleString() + ')';
+      // Fill track from 50% to 100% range
+      const pctPos = ((val - 50) / (100 - 50)) * 100;
+      document.getElementById('soft-track-fill').style.width = pctPos + '%';
+    }
+
+    function updateHard(val) {
+      val = Math.max(70, Math.min(120, Number(val)));
+      document.getElementById('hard-cap-input').value = val;
+      document.getElementById('hard-cap-slider').value = val;
+      const dollar = Math.round(5000 * (val / 100));
+      document.getElementById('hard-cap-dollar').innerText = '$' + dollar.toLocaleString();
+      document.getElementById('hard-cap-label-badge').innerText = val + '% ($' + dollar.toLocaleString() + ')';
+      // Fill track from 70% to 120% range
+      const pctPos = ((val - 70) / (120 - 70)) * 100;
+      document.getElementById('hard-track-fill').style.width = pctPos + '%';
+    }
+
+    // Initialize track fill positions
+    updateSoft(80);
+    updateHard(100);
+  </script>
+</body></html>

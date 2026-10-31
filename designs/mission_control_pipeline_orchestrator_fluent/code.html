@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<title>Synthetix Factory OS - Mission Control</title>
+<!-- Segoe UI Variable via Microsoft CDN / System Fallback & Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI+Variable:wght@300;400;500;600;700&amp;family=Cascadia+Code:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            // Fluent 2 Dark Mode Mica & Acrylic System
+            mica: {
+              base: "#202020",
+              canvas: "#181818",
+              card: "#2c2c2c",
+              cardHover: "#333333",
+              cardSubtle: "#242424",
+              cardStroke: "rgba(255, 255, 255, 0.08)",
+              cardStrokeStrong: "rgba(255, 255, 255, 0.14)",
+              acrylic: "rgba(36, 36, 36, 0.85)",
+            },
+            fluent: {
+              blue: "#0078d4",
+              blueHover: "#118dff",
+              bluePressed: "#005a9e",
+              blueSubtle: "rgba(0, 120, 212, 0.15)",
+              blueSubtleHover: "rgba(0, 120, 212, 0.25)",
+              green: "#107c41",
+              greenLight: "#13a10e",
+              greenSubtle: "rgba(19, 161, 14, 0.15)",
+              yellow: "#ffb900",
+              yellowSubtle: "rgba(255, 185, 0, 0.15)",
+              red: "#d13438",
+              redSubtle: "rgba(209, 52, 56, 0.15)",
+              textPrimary: "#ffffff",
+              textSecondary: "#d2d2d2",
+              textTertiary: "#979797",
+              divider: "rgba(255, 255, 255, 0.08)",
+            }
+          },
+          fontFamily: {
+            fluent: ['"Segoe UI Variable"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            mono: ['"Cascadia Code"', 'Consolas', 'monospace']
+          },
+          borderRadius: {
+            'fluent-sm': '4px',
+            'fluent-md': '6px',
+            'fluent-lg': '8px',
+            'fluent-pill': '9999px',
+          },
+          boxShadow: {
+            'fluent-elevation-4': '0 2px 4px rgba(0, 0, 0, 0.24), 0 0 1px rgba(0, 0, 0, 0.28)',
+            'fluent-elevation-8': '0 4px 8px rgba(0, 0, 0, 0.28), 0 0 2px rgba(0, 0, 0, 0.24)',
+            'fluent-elevation-16': '0 8px 16px rgba(0, 0, 0, 0.36), 0 0 2px rgba(0, 0, 0, 0.24)',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: "Segoe UI Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #202020;
+      color: #ffffff;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Fluent scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.32);
+    }
+    .fluent-border {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .fluent-border-b {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .fluent-border-t {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="bg-mica-base text-fluent-textPrimary antialiased selection:bg-fluent-blue selection:text-white flex h-screen overflow-hidden">
+<!-- ================= MICROSOFT FLUENT NAVIGATION BAR (NAV RAIL / DRAWER) ================= -->
+<aside class="w-64 flex-shrink-0 bg-mica-canvas flex flex-col justify-between border-r border-mica-cardStroke z-50">
+<div class="flex flex-col">
+<!-- App Header / Window Shell Header -->
+<div class="h-12 flex items-center justify-between px-3.5 fluent-border-b bg-mica-canvas">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-fluent-md bg-fluent-blue flex items-center justify-center text-white shadow-fluent-elevation-4">
+<span class="material-symbols-outlined text-[18px]">developer_board</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[13px] font-semibold tracking-tight text-fluent-textPrimary leading-none">Synthetix Swarm</span>
+<span class="text-[10px] text-fluent-textTertiary tracking-wide uppercase mt-0.5 font-medium">Factory OS</span>
+</div>
+</div>
+<button class="w-7 h-7 rounded-fluent-sm flex items-center justify-center text-fluent-textSecondary hover:bg-white/10 transition-colors" title="Toggle Navigation">
+<span class="material-symbols-outlined text-[17px]">side_navigation</span>
+</button>
+</div>
+<!-- Agent Swarm Pill Card -->
+<div class="m-2.5 p-2 rounded-fluent-md bg-mica-cardSubtle fluent-border">
+<div class="flex items-center justify-between text-[11px] font-medium text-fluent-textSecondary mb-1">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-fluent-greenLight"></span>
+            SWARM RUNTIME
+          </span>
+<span class="font-mono text-[10px] px-1.5 py-0.2 rounded-fluent-sm bg-white/5 text-fluent-textTertiary">v4.2 PROD</span>
+</div>
+<div class="text-[11px] text-fluent-textTertiary flex items-center justify-between">
+<span>6 Active Agents</span>
+<span class="text-fluent-greenLight font-semibold">100% Ready</span>
+</div>
+</div>
+<!-- Section Title -->
+<div class="px-3.5 pt-2 pb-1">
+<span class="text-[11px] font-semibold text-fluent-textTertiary tracking-wider uppercase">Orchestration</span>
+</div>
+<!-- Fluent 2 Nav List -->
+<nav class="flex flex-col px-2 gap-0.5">
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-fluent-md text-fluent-textSecondary hover:bg-white/5 hover:text-white text-[13px] font-medium transition-all group" href="#">
+<span class="material-symbols-outlined text-[18px] text-fluent-textTertiary group-hover:text-white transition-colors">grid_view</span>
+<span>Overview</span>
+</a>
+<a class="relative flex items-center gap-2.5 px-2.5 py-1.5 rounded-fluent-md bg-white/10 text-white text-[13px] font-semibold shadow-fluent-elevation-4" href="#">
+<span class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-fluent-blue rounded-r-fluent-pill"></span>
+<span class="material-symbols-outlined text-[18px] text-fluent-blue">account_tree</span>
+<span>Mission Control</span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-fluent-md text-fluent-textSecondary hover:bg-white/5 hover:text-white text-[13px] font-medium transition-all group" href="#">
+<span class="material-symbols-outlined text-[18px] text-fluent-textTertiary group-hover:text-white transition-colors">view_kanban</span>
+<span>Task Matrix</span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-fluent-md text-fluent-textSecondary hover:bg-white/5 hover:text-white text-[13px] font-medium transition-all group" href="#">
+<span class="material-symbols-outlined text-[18px] text-fluent-textTertiary group-hover:text-white transition-colors">verified_user</span>
+<span>Quality &amp; Sandboxes</span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-fluent-md text-fluent-textSecondary hover:bg-white/5 hover:text-white text-[13px] font-medium transition-all group" href="#">
+<span class="material-symbols-outlined text-[18px] text-fluent-textTertiary group-hover:text-white transition-colors">tune</span>
+<span>Fleet &amp; Tuning</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Telemetry & Controls -->
+<div class="p-3 fluent-border-t bg-mica-canvas flex flex-col gap-2.5">
+<div class="rounded-fluent-md bg-mica-cardSubtle p-2.5 fluent-border flex flex-col gap-2">
+<div class="flex items-center justify-between text-[11px] text-fluent-textTertiary">
+<span class="font-medium">GPU Memory</span>
+<span class="font-mono text-white font-semibold">78%</span>
+</div>
+<!-- Fluent Progress Bar -->
+<div class="w-full h-1 bg-white/10 rounded-fluent-pill overflow-hidden">
+<div class="h-full bg-fluent-blue rounded-fluent-pill" style="width: 78%"></div>
+</div>
+<div class="flex items-center justify-between text-[11px] text-fluent-textTertiary pt-1">
+<span>Context Hit</span>
+<span class="font-mono text-fluent-greenLight font-semibold">94%</span>
+</div>
+<div class="flex items-center justify-between text-[11px] text-fluent-textTertiary">
+<span>Throughput</span>
+<span class="font-mono text-white font-semibold">4,120 T/s</span>
+</div>
+</div>
+<!-- Emergency Pause Button (Fluent Destructive Button) -->
+<button class="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-fluent-md bg-fluent-redSubtle text-[#ff99a4] hover:bg-fluent-red hover:text-white border border-fluent-red/40 text-[12px] font-semibold transition-all shadow-sm">
+<span class="material-symbols-outlined text-[15px]">power_settings_new</span>
+<span>Pause Pipeline</span>
+</button>
+</div>
+</aside>
+<!-- ================= MAIN FLUENT WINDOW CANVAS ================= -->
+<div class="flex-1 flex flex-col min-w-0 bg-mica-base overflow-hidden">
+<!-- Fluent App Bar / Command Header -->
+<header class="h-12 bg-mica-canvas/80 backdrop-blur-md fluent-border-b flex items-center justify-between px-4 z-40 flex-shrink-0">
+<div class="flex items-center gap-3">
+<!-- Breadcrumb -->
+<div class="flex items-center gap-1.5 text-[12px] font-medium text-fluent-textTertiary">
+<span class="text-fluent-textSecondary hover:text-white cursor-pointer transition-colors">synthetix</span>
+<span class="text-white/20">/</span>
+<span class="text-fluent-textSecondary hover:text-white cursor-pointer transition-colors">agent-core</span>
+<span class="text-white/20">/</span>
+<span class="text-white font-semibold">pipeline-controller</span>
+</div>
+<!-- Status Badge -->
+<div class="hidden md:flex items-center gap-1.5 px-2 py-0.5 rounded-fluent-pill bg-fluent-greenSubtle text-fluent-greenLight text-[11px] font-medium border border-fluent-greenLight/30">
+<span class="w-1.5 h-1.5 rounded-full bg-fluent-greenLight"></span>
+<span>99.8% Test Pass</span>
+</div>
+</div>
+<!-- Search & Profile -->
+<div class="flex items-center gap-2.5">
+<!-- Fluent SearchBox -->
+<div class="relative flex items-center bg-mica-cardSubtle rounded-fluent-md border border-white/10 focus-within:border-fluent-blue px-2.5 py-1 w-64 transition-all">
+<span class="material-symbols-outlined text-[16px] text-fluent-textTertiary mr-2">search</span>
+<input class="bg-transparent text-[12px] text-white placeholder-fluent-textTertiary focus:outline-none w-full" placeholder="Search pipelines, agents, diffs..." type="text"/>
+<kbd class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-fluent-textTertiary border border-white/5">⌘K</kbd>
+</div>
+<button class="w-8 h-8 rounded-fluent-md flex items-center justify-center text-fluent-textSecondary hover:bg-white/10 hover:text-white relative transition-colors">
+<span class="material-symbols-outlined text-[19px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-fluent-blue"></span>
+</button>
+<div class="h-4 w-px bg-white/10 mx-0.5"></div>
+<div class="flex items-center gap-2 pl-1 cursor-pointer group">
+<div class="relative">
+<img alt="Alex Vance" class="w-7 h-7 rounded-fluent-pill ring-1 ring-white/20 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTpp2t-3QU9PijHmWRR1vDBFTFkC_RWwxu2U7nmPgv830gHnTsrReY7vdGKjuAj-v9mnRh_gx2aw4AAigc-3y65jUaEEN6vZiney16WQ317hoQvQWcmy24WAE1FhoIjisfpJOLltR6E1gbyvaa5hXNadOvBasiBnRGRmUiLDYyZji1_fWgzeN91yyxzZv1X-IAyXVc6fszR5ceeblSKCLihlZYjedhTy2QyLXiUWUa08BfuWOwSdiF"/>
+<span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-fluent-greenLight ring-1 ring-mica-base"></span>
+</div>
+<div class="hidden sm:flex flex-col text-left">
+<span class="text-[12px] font-semibold text-fluent-textPrimary leading-none group-hover:text-fluent-blue transition-colors">Alex Vance</span>
+<span class="text-[10px] text-fluent-textTertiary leading-none mt-1">Staff Architect</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Scrollable Workspace Body -->
+<main class="flex-1 overflow-y-auto p-4 space-y-4">
+<!-- ================= 1. FLUENT STAT METRICS BAR ================= -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+<!-- Metric Card 1 -->
+<div class="p-3.5 rounded-fluent-lg bg-mica-card fluent-border hover:border-mica-cardStrokeStrong shadow-fluent-elevation-4 flex flex-col justify-between transition-all">
+<div class="flex items-center justify-between text-fluent-textTertiary text-[11px] font-semibold uppercase tracking-wider">
+<span>Active Pipelines</span>
+<span class="flex items-center gap-1 text-fluent-blue text-[11px] font-medium px-1.5 py-0.5 rounded-fluent-sm bg-fluent-blueSubtle">
+<span class="w-1.5 h-1.5 rounded-full bg-fluent-blue animate-pulse"></span>LIVE
+            </span>
+</div>
+<div class="my-2 flex items-baseline gap-2">
+<span class="text-[26px] font-bold text-white tracking-tight leading-none">7</span>
+<span class="text-[12px] text-fluent-textSecondary">In Flight</span>
+</div>
+<div class="flex items-center gap-1.5 text-[11px] text-fluent-greenLight font-medium">
+<span class="material-symbols-outlined text-[14px]">queue</span>
+<span>+2 Queued in backlog</span>
+</div>
+</div>
+<!-- Metric Card 2 -->
+<div class="p-3.5 rounded-fluent-lg bg-mica-card fluent-border hover:border-mica-cardStrokeStrong shadow-fluent-elevation-4 flex flex-col justify-between transition-all">
+<div class="flex items-center justify-between text-fluent-textTertiary text-[11px] font-semibold uppercase tracking-wider">
+<span>24h PR Velocity</span>
+<span class="text-fluent-greenLight text-[11px] font-semibold flex items-center gap-0.5">
+              ▲ 18%
+            </span>
+</div>
+<div class="my-2 flex items-baseline gap-2">
+<span class="text-[26px] font-bold text-white tracking-tight leading-none">42</span>
+<span class="text-[12px] text-fluent-textSecondary">Merged</span>
+</div>
+<div class="flex items-center gap-1.5 text-[11px] text-fluent-textSecondary">
+<span class="text-fluent-textTertiary">Mean MTTD:</span>
+<span class="font-mono text-white font-medium">1.2m</span>
+</div>
+</div>
+<!-- Metric Card 3 -->
+<div class="p-3.5 rounded-fluent-lg bg-mica-card fluent-border hover:border-mica-cardStrokeStrong shadow-fluent-elevation-4 flex flex-col justify-between transition-all">
+<div class="flex items-center justify-between text-fluent-textTertiary text-[11px] font-semibold uppercase tracking-wider">
+<span>Code Volume</span>
+<span class="text-fluent-blue font-mono text-[11px]">84.2k LOC</span>
+</div>
+<div class="my-2 flex items-baseline gap-2">
+<span class="text-[26px] font-bold text-white tracking-tight leading-none">+14.3k</span>
+<span class="text-[12px] text-fluent-textSecondary">net LOC</span>
+</div>
+<div class="w-full bg-white/10 h-1 rounded-fluent-pill overflow-hidden mt-1">
+<div class="bg-fluent-blue h-full rounded-fluent-pill" style="width: 74%"></div>
+</div>
+</div>
+<!-- Metric Card 4 -->
+<div class="p-3.5 rounded-fluent-lg bg-mica-card fluent-border hover:border-mica-cardStrokeStrong shadow-fluent-elevation-4 flex flex-col justify-between transition-all">
+<div class="flex items-center justify-between text-fluent-textTertiary text-[11px] font-semibold uppercase tracking-wider">
+<span>Pipeline Reliability</span>
+<span class="text-fluent-greenLight text-[10px] font-bold px-1.5 py-0.2 rounded-fluent-sm bg-fluent-greenSubtle">STABLE</span>
+</div>
+<div class="my-2 flex items-baseline gap-2">
+<span class="text-[26px] font-bold text-fluent-greenLight tracking-tight leading-none">99.76%</span>
+<span class="text-[12px] text-fluent-textSecondary">success</span>
+</div>
+<div class="flex items-center gap-1 text-[11px] text-fluent-textSecondary">
+<span class="material-symbols-outlined text-[13px] text-fluent-greenLight">check_circle</span>
+<span>0 Auto-rollbacks in 24h</span>
+</div>
+</div>
+</section>
+<!-- ================= 2. PIPELINE STEPPER WORKFLOW & LIVE TELEMETRY ================= -->
+<section class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+<!-- Left: Fluent Sequential Workflow / Stepper (8 Cols) -->
+<div class="xl:col-span-8 rounded-fluent-lg bg-mica-card fluent-border p-4 shadow-fluent-elevation-8 flex flex-col gap-4">
+<!-- Command Bar / Pipeline Header -->
+<div class="flex flex-wrap items-center justify-between gap-3 pb-3 fluent-border-b">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-fluent-md bg-fluent-blueSubtle text-fluent-blue flex items-center justify-center border border-fluent-blue/20">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+</div>
+<div>
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-mono text-fluent-blue font-semibold text-[13px]">#4081</span>
+<span class="text-[14px] font-bold text-white">feat/auth-edge-tokens</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-fluent-pill bg-fluent-blue text-white text-[10px] font-semibold tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                    RUNNING
+                  </span>
+</div>
+<div class="text-[11px] text-fluent-textTertiary flex items-center gap-2 mt-0.5">
+<span>Target: <strong class="text-fluent-textSecondary font-normal">staging-us-east-1</strong></span>
+<span>•</span>
+<span>Trigger: <strong class="text-fluent-textSecondary font-normal">Autonomous Issue Decomposer</strong></span>
+</div>
+</div>
+</div>
+<!-- Fluent Actions / CommandBar Buttons -->
+<div class="flex items-center gap-1.5">
+<button class="px-3 py-1.5 rounded-fluent-sm bg-white/5 hover:bg-white/10 text-white text-[12px] font-medium border border-white/10 flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[16px]">call_split</span>
+<span>Fork Pipeline</span>
+</button>
+<button class="px-3.5 py-1.5 rounded-fluent-sm bg-fluent-blue hover:bg-fluent-blueHover active:bg-fluent-bluePressed text-white text-[12px] font-semibold flex items-center gap-1.5 transition-colors shadow-fluent-elevation-4">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>Steer Agent</span>
+</button>
+</div>
+</div>
+<!-- Fluent Workflow Sequential Stepper -->
+<div class="rounded-fluent-md bg-mica-cardSubtle fluent-border p-3.5 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-semibold tracking-wider text-fluent-textTertiary uppercase">Autonomous Stage Progress</span>
+</div>
+<span class="font-mono text-[11px] text-fluent-blue font-semibold">Stage 3 of 4 Active • Overall: 78%</span>
+</div>
+<!-- Fluent 2 Workflow Steps Grid with Connectors -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-2.5 relative">
+<!-- Stage 1: Product Spec (Completed - Green) -->
+<div class="relative bg-mica-card p-3 rounded-fluent-md border border-fluent-greenLight/30 flex flex-col justify-between gap-2 shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-fluent-greenLight font-semibold text-[11px]">
+<div class="w-5 h-5 rounded-fluent-pill bg-fluent-greenSubtle border border-fluent-greenLight flex items-center justify-center">
+<span class="material-symbols-outlined text-[13px]">check</span>
+</div>
+<span>STAGE 1</span>
+</div>
+<span class="font-mono text-[10px] text-fluent-textTertiary">1.4s</span>
+</div>
+<div>
+<h4 class="text-[13px] font-semibold text-white">Product Spec</h4>
+<p class="font-mono text-[11px] text-fluent-textTertiary mt-0.5">Architect-Prime</p>
+</div>
+<div class="pt-2 fluent-border-t flex items-center justify-between text-[11px] text-fluent-greenLight">
+<span class="font-medium">Completed</span>
+<span class="material-symbols-outlined text-[14px]">done_all</span>
+</div>
+</div>
+<!-- Stage 2: Architecture (Completed - Green) -->
+<div class="relative bg-mica-card p-3 rounded-fluent-md border border-fluent-greenLight/30 flex flex-col justify-between gap-2 shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-fluent-greenLight font-semibold text-[11px]">
+<div class="w-5 h-5 rounded-fluent-pill bg-fluent-greenSubtle border border-fluent-greenLight flex items-center justify-center">
+<span class="material-symbols-outlined text-[13px]">check</span>
+</div>
+<span>STAGE 2</span>
+</div>
+<span class="font-mono text-[10px] text-fluent-textTertiary">3.1s</span>
+</div>
+<div>
+<h4 class="text-[13px] font-semibold text-white">Architecture</h4>
+<p class="font-mono text-[11px] text-fluent-textTertiary mt-0.5">Architect-Prime</p>
+</div>
+<div class="pt-2 fluent-border-t flex items-center justify-between text-[11px] text-fluent-greenLight">
+<span class="font-medium">Completed</span>
+<span class="material-symbols-outlined text-[14px]">done_all</span>
+</div>
+</div>
+<!-- Stage 3: Code Synthesis (In Progress - Fluent Blue Glow) -->
+<div class="relative bg-mica-card p-3 rounded-fluent-md border-2 border-fluent-blue shadow-fluent-elevation-8 flex flex-col justify-between gap-2 ring-1 ring-fluent-blue/30">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-fluent-blue font-semibold text-[11px]">
+<div class="w-5 h-5 rounded-fluent-pill bg-fluent-blue text-white flex items-center justify-center shadow-sm">
+<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+</div>
+<span>STAGE 3</span>
+</div>
+<span class="font-mono text-[10px] text-fluent-blue font-semibold animate-pulse">42s elapsed</span>
+</div>
+<div>
+<h4 class="text-[13px] font-semibold text-white">Code Synthesis</h4>
+<p class="font-mono text-[11px] text-fluent-blueHover font-medium mt-0.5">CodeCraft (DeepSeek)</p>
+</div>
+<div class="pt-2 fluent-border-t flex flex-col gap-1">
+<div class="flex items-center justify-between text-[11px]">
+<span class="text-fluent-blue font-medium">In Progress</span>
+<span class="font-mono text-white font-semibold">78%</span>
+</div>
+<div class="w-full bg-white/10 h-1.5 rounded-fluent-pill overflow-hidden">
+<div class="bg-fluent-blue h-full rounded-fluent-pill animate-pulse" style="width: 78%"></div>
+</div>
+</div>
+</div>
+<!-- Stage 4: Verification & Security (Queued / Standby) -->
+<div class="relative bg-mica-card/50 p-3 rounded-fluent-md fluent-border flex flex-col justify-between gap-2 opacity-75">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 text-fluent-textTertiary font-semibold text-[11px]">
+<div class="w-5 h-5 rounded-fluent-pill bg-white/5 border border-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px]">hourglass_empty</span>
+</div>
+<span>STAGE 4</span>
+</div>
+<span class="font-mono text-[10px] text-fluent-textTertiary">Standby</span>
+</div>
+<div>
+<h4 class="text-[13px] font-semibold text-fluent-textSecondary">Verification &amp; Security</h4>
+<p class="font-mono text-[11px] text-fluent-textTertiary mt-0.5">SecOps &amp; GateKeeper</p>
+</div>
+<div class="pt-2 fluent-border-t flex items-center justify-between text-[11px] text-fluent-textTertiary">
+<span>Queued Next</span>
+<span class="material-symbols-outlined text-[14px]">pending</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Telemetry in Stepper Container -->
+<div class="flex flex-wrap items-center justify-between text-[12px] text-fluent-textTertiary pt-1">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-fluent-greenLight"></span>
+<span class="text-white font-medium">6 Specialists Operational</span>
+<span class="text-white/20">•</span>
+<span>3 Active in Pipeline</span>
+</div>
+<div class="flex items-center gap-1 text-fluent-blue font-semibold">
+<span class="material-symbols-outlined text-[15px]">speed</span>
+<span>Convergence: 94.6%</span>
+</div>
+</div>
+</div>
+<!-- Right: Fluent Live Telemetry Feed (4 Cols) -->
+<div class="xl:col-span-4 rounded-fluent-lg bg-mica-card fluent-border p-3.5 shadow-fluent-elevation-8 flex flex-col">
+<div class="flex items-center justify-between pb-2.5 fluent-border-b mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-fluent-blue">insights</span>
+<h3 class="text-[13px] font-bold text-white">Live Telemetry Feed</h3>
+<span class="px-1.5 py-0.2 rounded-fluent-sm bg-fluent-greenSubtle text-fluent-greenLight text-[10px] font-bold">LIVE</span>
+</div>
+<span class="text-[11px] font-mono text-fluent-textTertiary">128 T/s</span>
+</div>
+<!-- Feed Container -->
+<div class="flex flex-col gap-1.5 h-[272px] overflow-y-auto pr-1 font-mono text-[11px]" id="streamContainer">
+<div class="p-2 rounded-fluent-sm bg-mica-cardSubtle border border-white/5 hover:border-white/10 transition-colors">
+<div class="flex items-center justify-between text-fluent-textTertiary text-[10px] mb-0.5">
+<span class="text-fluent-blue">[23:44:31.665] TELEMETRY</span>
+<span class="text-fluent-greenLight">OK</span>
+</div>
+<p class="text-fluent-textSecondary leading-tight">[LINTER] AST verification passed for Node 3A</p>
+</div>
+<div class="p-2 rounded-fluent-sm bg-mica-cardSubtle border border-white/5 hover:border-white/10 transition-colors">
+<div class="flex items-center justify-between text-fluent-textTertiary text-[10px] mb-0.5">
+<span class="text-fluent-blue">[23:45:08.019] TELEMETRY</span>
+<span class="text-fluent-greenLight">OK</span>
+</div>
+<p class="text-fluent-textSecondary leading-tight">[SYNTH] DeepSeek sub-token generation 128 T/s</p>
+</div>
+<div class="p-2 rounded-fluent-sm bg-mica-cardSubtle border border-white/5 hover:border-white/10 transition-colors">
+<div class="flex items-center justify-between text-fluent-textTertiary text-[10px] mb-0.5">
+<span class="text-fluent-blue">[23:46:56.059] TELEMETRY</span>
+<span class="text-fluent-greenLight">OK</span>
+</div>
+<p class="text-fluent-textSecondary leading-tight">[HEARTBEAT] Worker #4 ping 18ms latency</p>
+</div>
+<div class="p-2 rounded-fluent-sm bg-mica-cardSubtle border border-white/5 hover:border-white/10 transition-colors">
+<div class="flex items-center justify-between text-fluent-textTertiary text-[10px] mb-0.5">
+<span class="text-fluent-blue">[23:47:32.065] TELEMETRY</span>
+<span class="text-fluent-greenLight">OK</span>
+</div>
+<p class="text-fluent-textSecondary leading-tight">[LINTER] AST verification passed for Node 3A</p>
+</div>
+<div class="p-2 rounded-fluent-sm bg-mica-cardSubtle border border-white/5 hover:border-white/10 transition-colors">
+<div class="flex items-center justify-between text-fluent-textTertiary text-[10px] mb-0.5">
+<span class="text-fluent-blue">[23:48:19.711] TELEMETRY</span>
+<span class="text-fluent-greenLight">OK</span>
+</div>
+<p class="text-fluent-textSecondary leading-tight">[SYNTH] DeepSeek sub-token generation 128 T/s</p>
+</div>
+</div>
+<!-- Bottom Prompt Steer Input (Fluent TextBox) -->
+<div class="pt-2.5 fluent-border-t mt-2 flex flex-col gap-1.5">
+<div class="flex items-center justify-between text-[11px]">
+<span class="text-fluent-textTertiary uppercase font-semibold text-[10px] tracking-wider">Pipeline Guardrails</span>
+<span class="text-fluent-blue font-mono font-semibold text-[10px]">AUTO-PILOT L4</span>
+</div>
+<div class="flex items-center gap-1.5">
+<input class="w-full bg-mica-cardSubtle px-2.5 py-1.5 rounded-fluent-sm font-mono text-[11px] text-white placeholder-fluent-textTertiary border border-white/10 focus:outline-none focus:border-fluent-blue" id="promptSteerInput" placeholder="Inject steer instruction to agents..." type="text"/>
+<button class="px-3 py-1.5 rounded-fluent-sm bg-fluent-blue hover:bg-fluent-blueHover text-white text-[12px] font-semibold flex items-center gap-1 transition-colors whitespace-nowrap shadow-sm" id="steerBtn">
+<span class="material-symbols-outlined text-[15px]">send</span>
+<span>Steer</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= 3. FLUENT COMMAND BAR & DATA GRID (ACTIVE PR QUEUE) ================= -->
+<section class="rounded-fluent-lg bg-mica-card fluent-border p-4 shadow-fluent-elevation-8">
+<!-- CommandBar -->
+<div class="flex flex-wrap items-center justify-between pb-3 fluent-border-b gap-3">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-fluent-md bg-fluent-blueSubtle text-fluent-blue flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">merge_type</span>
+</div>
+<div>
+<h2 class="text-[14px] font-bold text-white">Active PR Build Queue</h2>
+<span class="text-[11px] text-fluent-textTertiary">(7 In Flight • 2 Ready for Release)</span>
+</div>
+</div>
+<!-- CommandBar Filters & Action Items -->
+<div class="flex items-center gap-2">
+<!-- Filter Dropdown Simulation -->
+<div class="flex items-center gap-1 text-[12px] text-fluent-textSecondary bg-mica-cardSubtle px-2.5 py-1 rounded-fluent-sm border border-white/10">
+<span class="text-fluent-textTertiary">Sort by:</span>
+<span class="text-white font-medium">Priority (Urgent)</span>
+<span class="material-symbols-outlined text-[16px] text-fluent-textTertiary ml-1">expand_more</span>
+</div>
+<!-- Refresh Command -->
+<button class="px-2.5 py-1 rounded-fluent-sm bg-mica-cardSubtle hover:bg-white/10 text-white text-[12px] font-medium border border-white/10 flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[15px]">refresh</span>
+<span>Poll Repo</span>
+</button>
+</div>
+</div>
+<!-- Fluent DataGrid / Table -->
+<div class="overflow-x-auto mt-2">
+<table class="w-full text-left border-collapse text-[12px]">
+<thead>
+<tr class="fluent-border-b text-fluent-textTertiary text-[11px] font-semibold uppercase tracking-wider">
+<th class="py-2.5 px-3">PR / Pipeline</th>
+<th class="py-2.5 px-3">Feature &amp; Description</th>
+<th class="py-2.5 px-3">Assigned Specialist</th>
+<th class="py-2.5 px-3">Status &amp; Progress</th>
+<th class="py-2.5 px-3 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/[0.04]">
+<!-- Row 1 -->
+<tr class="hover:bg-mica-cardHover transition-colors group">
+<td class="py-3 px-3 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-fluent-blue"></span>
+<span class="font-mono text-fluent-blue font-semibold">#4081</span>
+<span class="font-mono text-white">feat/auth-edge-tokens</span>
+</div>
+</td>
+<td class="py-3 px-3 max-w-md">
+<div class="text-fluent-textPrimary line-clamp-1 font-medium">Refactor JWT decoding to Cloudflare Edge workers with KMS integration</div>
+<div class="font-mono text-[10px] text-fluent-textTertiary mt-0.5">Impact: <span class="text-fluent-greenLight">+340</span> <span class="text-fluent-red">-112</span></div>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="px-2 py-0.5 rounded-fluent-sm bg-white/5 border border-white/10 text-fluent-blue text-[11px] font-medium">Architect-Prime</span>
+<span class="px-2 py-0.5 rounded-fluent-sm bg-white/5 border border-white/10 text-white text-[11px]">CodeCraft</span>
+<span class="px-2 py-0.5 rounded-fluent-sm bg-white/5 border border-white/10 text-fluent-greenLight text-[11px]">SecOps</span>
+</div>
+</td>
+<td class="py-3 px-3 min-w-[160px]">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-[11px]">
+<span class="text-fluent-blue font-semibold">Synthesizing</span>
+<span class="font-mono text-white font-medium">65%</span>
+</div>
+<div class="w-full bg-white/10 h-1.5 rounded-fluent-pill overflow-hidden">
+<div class="bg-fluent-blue h-full rounded-fluent-pill" style="width: 65%"></div>
+</div>
+</div>
+</td>
+<td class="py-3 px-3 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1 rounded-fluent-sm bg-white/5 hover:bg-white/10 text-white font-medium border border-white/10 text-[11px] transition-colors" onclick="openDiffModal('PR-4081')">
+                      View Diff
+                    </button>
+<button class="px-2.5 py-1 rounded-fluent-sm bg-fluent-blueSubtle hover:bg-fluent-blueSubtleHover text-fluent-blue font-semibold border border-fluent-blue/30 text-[11px] transition-colors">
+                      Steer
+                    </button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-mica-cardHover transition-colors group">
+<td class="py-3 px-3 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-fluent-yellow"></span>
+<span class="font-mono text-fluent-yellow font-semibold">#4080</span>
+<span class="font-mono text-white">fix/pg-connection-leak</span>
+</div>
+</td>
+<td class="py-3 px-3 max-w-md">
+<div class="text-fluent-textPrimary line-clamp-1 font-medium">Patch async connection pool exhaustion on batch mutation webhooks</div>
+<div class="font-mono text-[10px] text-fluent-textTertiary mt-0.5">Impact: <span class="text-fluent-greenLight">+18</span> <span class="text-fluent-red">-4</span></div>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="px-2 py-0.5 rounded-fluent-sm bg-white/5 border border-white/10 text-white text-[11px]">Architect-Prime</span>
+<span class="px-2 py-0.5 rounded-fluent-sm bg-white/5 border border-white/10 text-fluent-greenLight text-[11px]">SecOps-Vanguard</span>
+</div>
+</td>
+<td class="py-3 px-3 min-w-[160px]">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-[11px]">
+<span class="text-fluent-yellow font-semibold">Audit in Progress</span>
+<span class="font-mono text-white font-medium">90%</span>
+</div>
+<div class="w-full bg-white/10 h-1.5 rounded-fluent-pill overflow-hidden">
+<div class="bg-fluent-yellow h-full rounded-fluent-pill" style="width: 90%"></div>
+</div>
+</div>
+</td>
+<td class="py-3 px-3 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1 rounded-fluent-sm bg-white/5 hover:bg-white/10 text-white font-medium border border-white/10 text-[11px] transition-colors" onclick="openDiffModal('PR-4080')">
+                      View Diff
+                    </button>
+<button class="px-2.5 py-1 rounded-fluent-sm bg-fluent-blueSubtle hover:bg-fluent-blueSubtleHover text-fluent-blue font-semibold border border-fluent-blue/30 text-[11px] transition-colors">
+                      Steer
+                    </button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-mica-cardHover transition-colors group">
+<td class="py-3 px-3 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-fluent-greenLight"></span>
+<span class="font-mono text-fluent-greenLight font-semibold">#4079</span>
+<span class="font-mono text-white">perf/vector-embedding-cache</span>
+</div>
+</td>
+<td class="py-3 px-3 max-w-md">
+<div class="text-fluent-textPrimary line-clamp-1 font-medium">Add Redis semantic caching layer for frequent user prompt completions</div>
+<div class="font-mono text-[10px] text-fluent-textTertiary mt-0.5">Impact: <span class="text-fluent-greenLight">+842</span> <span class="text-fluent-red">-94</span></div>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="px-2 py-0.5 rounded-fluent-sm bg-white/5 border border-white/10 text-fluent-greenLight text-[11px]">GateKeeper</span>
+<span class="px-2 py-0.5 rounded-fluent-sm bg-white/5 border border-white/10 text-white text-[11px]">CodeCraft</span>
+<span class="px-2 py-0.5 rounded-fluent-sm bg-white/5 border border-white/10 text-fluent-blue text-[11px]">SentryWatch</span>
+</div>
+</td>
+<td class="py-3 px-3 min-w-[160px]">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between text-[11px] text-fluent-greenLight">
+<span class="font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">verified</span>
+                        Tests Passed
+                      </span>
+<span class="font-mono font-bold">READY</span>
+</div>
+<div class="w-full bg-white/10 h-1.5 rounded-fluent-pill overflow-hidden">
+<div class="bg-fluent-greenLight h-full rounded-fluent-pill" style="width: 100%"></div>
+</div>
+</div>
+</td>
+<td class="py-3 px-3 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1 rounded-fluent-sm bg-white/5 hover:bg-white/10 text-white font-medium border border-white/10 text-[11px] transition-colors" onclick="openDiffModal('PR-4079')">
+                      View Diff
+                    </button>
+<button class="px-3 py-1 rounded-fluent-sm bg-fluent-green hover:bg-fluent-greenLight text-white font-semibold text-[11px] transition-colors shadow-sm">
+                      Auto-Release
+                    </button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+</div>
+<!-- ================= FLUENT ACRYLIC MODAL: QUICK DIFF PREVIEW ================= -->
+<div class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 hidden items-center justify-center p-4" id="diffModal">
+<div class="bg-mica-card max-w-3xl w-full rounded-fluent-lg fluent-border shadow-fluent-elevation-16 flex flex-col max-h-[85vh] overflow-hidden animate-in fade-in duration-150">
+<!-- Fluent Window Header -->
+<div class="p-3.5 bg-mica-cardSubtle fluent-border-b flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-6 h-6 rounded-fluent-sm bg-fluent-blueSubtle text-fluent-blue flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">difference</span>
+</div>
+<div>
+<div class="flex items-center gap-2 text-[13px] font-bold text-white">
+<span>PR #4081 Quick Diff:</span>
+<span class="font-mono text-fluent-blue font-medium text-[12px]">apps/gateway/middleware/auth.edge.ts</span>
+</div>
+<span class="text-[11px] text-fluent-textTertiary">Generated autonomously by DeepSeek Coder V2 in 34.2s</span>
+</div>
+</div>
+<button class="w-7 h-7 rounded-fluent-sm flex items-center justify-center text-fluent-textSecondary hover:bg-white/10 hover:text-white transition-colors" onclick="closeDiffModal()">
+<span class="material-symbols-outlined text-[17px]">close</span>
+</button>
+</div>
+<!-- Diff Content with Cascadia Code font -->
+<div class="p-4 overflow-y-auto font-mono text-[11.5px] leading-relaxed bg-[#1b1b1b] text-white space-y-1">
+<div class="text-fluent-textTertiary">@@ -42,8 +42,14 @@ export async function authenticateRequest(req: EdgeRequest) {</div>
+<div class="text-[#ff99a4] bg-fluent-redSubtle px-2 py-0.5 rounded-fluent-sm">- const token = req.headers.get("x-legacy-bearer");</div>
+<div class="text-[#ff99a4] bg-fluent-redSubtle px-2 py-0.5 rounded-fluent-sm">- const decoded = await verifyTraditionalJwt(token, process.env.SECRET_KEY);</div>
+<div class="text-[#89d185] bg-fluent-greenSubtle px-2 py-0.5 rounded-fluent-sm">+ // Synthetix Edge KMS Optimized Auth Pipeline</div>
+<div class="text-[#89d185] bg-fluent-greenSubtle px-2 py-0.5 rounded-fluent-sm">+ const edgeAuthHeader = req.headers.get("authorization")?.replace("Bearer ", "");</div>
+<div class="text-[#89d185] bg-fluent-greenSubtle px-2 py-0.5 rounded-fluent-sm">+ if (!edgeAuthHeader) return new Response("Unauthorized", { status: 401 });</div>
+<div class="text-[#89d185] bg-fluent-greenSubtle px-2 py-0.5 rounded-fluent-sm">+ const session = await cryptoKmsSubtle.verifySignature(edgeAuthHeader, {</div>
+<div class="text-[#89d185] bg-fluent-greenSubtle px-2 py-0.5 rounded-fluent-sm">+   algorithm: 'ECDSA_SHA_256',</div>
+<div class="text-[#89d185] bg-fluent-greenSubtle px-2 py-0.5 rounded-fluent-sm">+   clockToleranceSeconds: 5,</div>
+<div class="text-[#89d185] bg-fluent-greenSubtle px-2 py-0.5 rounded-fluent-sm">+ });</div>
+<div class="text-fluent-textTertiary">@@ -60,6 +66,9 @@ export async function authenticateRequest(req: EdgeRequest) {</div>
+<div class="text-[#89d185] bg-fluent-greenSubtle px-2 py-0.5 rounded-fluent-sm">+ req.ctx.set("agent-orchestrator-id", session.principalId);</div>
+<div class="text-fluent-textSecondary">  return next();</div>
+</div>
+<!-- Fluent Modal Footer -->
+<div class="p-3 bg-mica-cardSubtle fluent-border-t flex items-center justify-between">
+<div class="flex items-center gap-2 text-[11px] text-fluent-textTertiary">
+<span class="text-fluent-greenLight font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check</span> Zero vulnerabilities flagged
+          </span>
+<span>•</span>
+<span>100% Type Safe</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3.5 py-1.5 rounded-fluent-sm bg-white/5 hover:bg-white/10 text-white font-medium border border-white/10 text-[12px] transition-colors" onclick="closeDiffModal()">
+            Close
+          </button>
+<button class="px-3.5 py-1.5 rounded-fluent-sm bg-fluent-blue hover:bg-fluent-blueHover text-white font-semibold text-[12px] shadow-sm flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>Approve &amp; Resume Run</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Logic scripts -->
+<script>
+    function openDiffModal(prId) {
+      const modal = document.getElementById('diffModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeDiffModal() {
+      const modal = document.getElementById('diffModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    const steerBtn = document.getElementById('steerBtn');
+    const steerInput = document.getElementById('promptSteerInput');
+    const streamContainer = document.getElementById('streamContainer');
+
+    if (steerBtn && steerInput && streamContainer) {
+      steerBtn.addEventListener('click', () => {
+        const val = steerInput.value.trim();
+        if (!val) return;
+
+        const now = new Date();
+        const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
+
+        const entry = document.createElement('div');
+        entry.className = "p-2 rounded-fluent-sm bg-fluent-blueSubtle border border-fluent-blue/30";
+        entry.innerHTML = `
+          <div class="flex items-center justify-between text-fluent-blue text-[10px] mb-0.5">
+            <span class="font-bold">[${timeStr}] ARCHITECT_STEER</span>
+            <span class="text-fluent-greenLight">INJECTED</span>
+          </div>
+          <p class="text-white leading-tight font-medium font-mono text-[11px]">"${val}"</p>
+          <span class="text-fluent-textTertiary text-[10px] mt-0.5 block">Dispatched override vector to Node 3B (DeepSeek Coder).</span>
+        `;
+
+        streamContainer.appendChild(entry);
+        streamContainer.scrollTop = streamContainer.scrollHeight;
+        steerInput.value = '';
+      });
+
+      steerInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          steerBtn.click();
+        }
+      });
+    }
+
+    // Live Telemetry stream tick
+    setInterval(() => {
+      if (!streamContainer) return;
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
+      
+      const tokens = [
+        '[HEARTBEAT] Worker #4 ping 18ms latency',
+        '[LINTER] AST verification passed for Node 3A',
+        '[SYNTH] DeepSeek sub-token generation 128 T/s'
+      ];
+      const randomMsg = tokens[Math.floor(Math.random() * tokens.length)];
+
+      const tick = document.createElement('div');
+      tick.className = "p-2 rounded-fluent-sm bg-mica-cardSubtle border border-white/5 hover:border-white/10 transition-colors";
+      tick.innerHTML = `
+        <div class="flex items-center justify-between text-fluent-textTertiary text-[10px] mb-0.5">
+          <span class="text-fluent-blue">[${timeStr}] TELEMETRY</span>
+          <span class="text-fluent-greenLight">OK</span>
+        </div>
+        <p class="text-fluent-textSecondary leading-tight">${randomMsg}</p>
+      `;
+
+      streamContainer.appendChild(tick);
+      if (streamContainer.children.length > 20) {
+        streamContainer.removeChild(streamContainer.children[0]);
+      }
+    }, 12000);
+  </script>
+</body></html>

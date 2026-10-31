@@ -1,0 +1,376 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><svg class="inline-defs-container" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></svg><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"error":"#ffb4ab","inverse-primary":"#00687a","primary-fixed":"#acedff","surface-bright":"#353942","surface-container-highest":"#31353e","on-tertiary-fixed":"#002113","on-error-container":"#ffdad6","inverse-surface":"#dfe2ee","surface-container-high":"#262a33","secondary":"#d0bcff","on-error":"#690005","primary-container":"#06b6d4","on-surface":"#dfe2ee","on-primary-container":"#00424f","surface":"#0f131c","surface-variant":"#31353e","primary":"#4cd7f6","tertiary":"#4edea3","tertiary-fixed-dim":"#4edea3","secondary-fixed-dim":"#d0bcff","surface-dim":"#0f131c","outline-variant":"#3d494c","background":"#0f131c","surface-container":"#1c2028","on-secondary-fixed":"#23005c","tertiary-container":"#1bbd85","secondary-container":"#571bc1","error-container":"#93000a","outline":"#869397","on-primary-fixed-variant":"#004e5c","on-secondary":"#3c0091","on-tertiary":"#003824","on-surface-variant":"#bcc9cd","on-tertiary-container":"#00452e","surface-container-low":"#181c24","inverse-on-surface":"#2c3039","surface-tint":"#4cd7f6","on-background":"#dfe2ee","on-secondary-fixed-variant":"#5516be","on-primary":"#003640","on-primary-fixed":"#001f26","tertiary-fixed":"#6ffbbe","on-tertiary-fixed-variant":"#005236","secondary-fixed":"#e9ddff","on-secondary-container":"#c4abff","primary-fixed-dim":"#4cd7f6","surface-container-lowest":"#0a0e16"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-lg":"0.75rem","space-xs":"0.25rem","space-2xl":"1.5rem","space-xl":"1rem","gutter-dense":"0.5rem","space-md":"0.5rem","space-sm":"0.375rem","gutter":"0.75rem","margin":"1rem","margin-compact":"0.5rem"},"fontFamily":{"headline-xl":["Geist"],"code-md":["JetBrains Mono"],"body-sm":["Geist"],"headline-sm":["Geist"],"code-lg":["JetBrains Mono"],"headline-md":["Geist"],"label-sm":["JetBrains Mono"],"label-md":["JetBrains Mono"],"headline-lg":["Geist"],"body-lg":["Geist"],"body-md":["Geist"]},"fontSize":{"headline-xl":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"600"}],"code-md":["12px",{"lineHeight":"16px","fontWeight":"400"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-sm":["15px",{"lineHeight":"20px","letterSpacing":"-0.005em","fontWeight":"500"}],"code-lg":["13px",{"lineHeight":"20px","fontWeight":"400"}],"headline-md":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["10px",{"lineHeight":"12px","letterSpacing":"0.06em","fontWeight":"500"}],"label-md":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"500"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-lg":["14px",{"lineHeight":"20px","fontWeight":"400"}],"body-md":["13px",{"lineHeight":"18px","fontWeight":"400"}]}}}}</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container"><svg class="inline-defs-container" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></svg><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"error":"#ffb4ab","inverse-primary":"#00687a","primary-fixed":"#acedff","surface-bright":"#353942","surface-container-highest":"#31353e","on-tertiary-fixed":"#002113","on-error-container":"#ffdad6","inverse-surface":"#dfe2ee","surface-container-high":"#262a33","secondary":"#d0bcff","on-error":"#690005","primary-container":"#06b6d4","on-surface":"#dfe2ee","on-primary-container":"#00424f","surface":"#0f131c","surface-variant":"#31353e","primary":"#4cd7f6","tertiary":"#4edea3","tertiary-fixed-dim":"#4edea3","secondary-fixed-dim":"#d0bcff","surface-dim":"#0f131c","outline-variant":"#3d494c","background":"#0f131c","surface-container":"#1c2028","on-secondary-fixed":"#23005c","tertiary-container":"#1bbd85","secondary-container":"#571bc1","error-container":"#93000a","outline":"#869397","on-primary-fixed-variant":"#004e5c","on-secondary":"#3c0091","on-tertiary":"#003824","on-surface-variant":"#bcc9cd","on-tertiary-container":"#00452e","surface-container-low":"#181c24","inverse-on-surface":"#2c3039","surface-tint":"#4cd7f6","on-background":"#dfe2ee","on-secondary-fixed-variant":"#5516be","on-primary":"#003640","on-primary-fixed":"#001f26","tertiary-fixed":"#6ffbbe","on-tertiary-fixed-variant":"#005236","secondary-fixed":"#e9ddff","on-secondary-container":"#c4abff","primary-fixed-dim":"#4cd7f6","surface-container-lowest":"#0a0e16"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-lg":"0.75rem","space-xs":"0.25rem","space-2xl":"1.5rem","space-xl":"1rem","gutter-dense":"0.5rem","space-md":"0.5rem","space-sm":"0.375rem","gutter":"0.75rem","margin":"1rem","margin-compact":"0.5rem"},"fontFamily":{"headline-xl":["Geist"],"code-md":["JetBrains Mono"],"body-sm":["Geist"],"headline-sm":["Geist"],"code-lg":["JetBrains Mono"],"headline-md":["Geist"],"label-sm":["JetBrains Mono"],"label-md":["JetBrains Mono"],"headline-lg":["Geist"],"body-lg":["Geist"],"body-md":["Geist"]},"fontSize":{"headline-xl":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"600"}],"code-md":["12px",{"lineHeight":"16px","fontWeight":"400"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-sm":["15px",{"lineHeight":"20px","letterSpacing":"-0.005em","fontWeight":"500"}],"code-lg":["13px",{"lineHeight":"20px","fontWeight":"400"}],"headline-md":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["10px",{"lineHeight":"12px","letterSpacing":"0.06em","fontWeight":"500"}],"label-md":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"500"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-lg":["14px",{"lineHeight":"20px","fontWeight":"400"}],"body-md":["13px",{"lineHeight":"18px","fontWeight":"400"}]}}}}</script><svg class="inline-defs-container" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></svg><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"error":"#ffb4ab","inverse-primary":"#00687a","primary-fixed":"#acedff","surface-bright":"#353942","surface-container-highest":"#31353e","on-tertiary-fixed":"#002113","on-error-container":"#ffdad6","inverse-surface":"#dfe2ee","surface-container-high":"#262a33","secondary":"#d0bcff","on-error":"#690005","primary-container":"#06b6d4","on-surface":"#dfe2ee","on-primary-container":"#00424f","surface":"#0f131c","surface-variant":"#31353e","primary":"#4cd7f6","tertiary":"#4edea3","tertiary-fixed-dim":"#4edea3","secondary-fixed-dim":"#d0bcff","surface-dim":"#0f131c","outline-variant":"#3d494c","background":"#0f131c","surface-container":"#1c2028","on-secondary-fixed":"#23005c","tertiary-container":"#1bbd85","secondary-container":"#571bc1","error-container":"#93000a","outline":"#869397","on-primary-fixed-variant":"#004e5c","on-secondary":"#3c0091","on-tertiary":"#003824","on-surface-variant":"#bcc9cd","on-tertiary-container":"#00452e","surface-container-low":"#181c24","inverse-on-surface":"#2c3039","surface-tint":"#4cd7f6","on-background":"#dfe2ee","on-secondary-fixed-variant":"#5516be","on-primary":"#003640","on-primary-fixed":"#001f26","tertiary-fixed":"#6ffbbe","on-tertiary-fixed-variant":"#005236","secondary-fixed":"#e9ddff","on-secondary-container":"#c4abff","primary-fixed-dim":"#4cd7f6","surface-container-lowest":"#0a0e16"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-lg":"0.75rem","space-xs":"0.25rem","space-2xl":"1.5rem","space-xl":"1rem","gutter-dense":"0.5rem","space-md":"0.5rem","space-sm":"0.375rem","gutter":"0.75rem","margin":"1rem","margin-compact":"0.5rem"},"fontFamily":{"headline-xl":["Geist"],"code-md":["JetBrains Mono"],"body-sm":["Geist"],"headline-sm":["Geist"],"code-lg":["JetBrains Mono"],"headline-md":["Geist"],"label-sm":["JetBrains Mono"],"label-md":["JetBrains Mono"],"headline-lg":["Geist"],"body-lg":["Geist"],"body-md":["Geist"]},"fontSize":{"headline-xl":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"600"}],"code-md":["12px",{"lineHeight":"16px","fontWeight":"400"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-sm":["15px",{"lineHeight":"20px","letterSpacing":"-0.005em","fontWeight":"500"}],"code-lg":["13px",{"lineHeight":"20px","fontWeight":"400"}],"headline-md":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["10px",{"lineHeight":"12px","letterSpacing":"0.06em","fontWeight":"500"}],"label-md":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"500"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-lg":["14px",{"lineHeight":"20px","fontWeight":"400"}],"body-md":["13px",{"lineHeight":"18px","fontWeight":"400"}]}}}}</script><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.4)]"><div class="flex flex-col"><div class="h-14 flex items-center justify-between px-margin bg-surface-container-low"><div class="flex items-center gap-space-sm"><img alt="Synthetix Swarm Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UKFWKdPliQo9X2Fkl4o_INtwxO_qk_jDx5xEWLpY_4u1unsK-8S9o-NotmOGma8eVTO1MD8EKHZ81MvtJOUtjOgcFU4ayvmtmp0b7ihd_hzkY5uPl83RI-rpGMdPFWK3Z4_kpCD-x2FS1-T-Yivaj40F4X4aVtF2dYLvgrOW9NfeQKv66_TFOPu3YWe1q3wAutLPC2_YnVe2lHRqZgo8y7fhKuaIpvQ09QN7xcaGq9h8CD5rQQNAjggYs"><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface font-semibold tracking-tight">SYNTHETIX</span><span class="font-label-sm text-label-sm text-primary tracking-widest uppercase">FACTORY OS</span></div></div><button class="flex items-center justify-center w-7 h-7 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[18px]">dock_to_right</span></button></div><div class="px-margin py-space-sm bg-surface-container/40"><div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-space-xs"><span class="">Agent Team</span><span class="flex items-center gap-1 text-tertiary"><span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-ping"></span>v4.2 PROD</span></div><div class="font-code-md text-code-md text-on-surface/90 truncate">6 Agents Active</div></div><div class="px-space-md py-space-sm"><span class="px-space-sm font-label-sm text-label-sm text-on-surface-variant/70 uppercase tracking-widest">Orchestration</span></div><nav class="flex flex-col px-space-md gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-medium"><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded transition-colors bg-primary-container text-on-primary-container font-medium" data-path="overview" href="#"><span class="material-symbols-outlined text-[18px]">dashboard</span><span class="font-body-md text-body-md">Overview</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="mission-control" href="#"><span class="material-symbols-outlined text-[18px]">account_tree</span><span class="font-body-md text-body-md">Mission Control</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="task-matrix" href="#"><span class="material-symbols-outlined text-[18px]">view_kanban</span><span class="font-body-md text-body-md">Task Matrix</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="quality-and-sandboxes" href="#"><span class="material-symbols-outlined text-[18px]">verified_user</span><span class="font-body-md text-body-md">Quality &amp; Sandboxes</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="fleet-and-tuning" href="#"><span class="material-symbols-outlined text-[18px]">tune</span><span class="font-body-md text-body-md">Fleet &amp; Tuning</span></a></nav></div><div class="flex flex-col p-space-md gap-space-md bg-surface-container-lowest"><div class="flex flex-col p-space-sm rounded bg-surface-container-low gap-space-xs"><div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant"><span class="">GPU MEMORY</span><span class="font-code-md text-code-md text-primary">78%</span></div><div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden"><div class="h-full bg-primary rounded-full" style="width: 78%"></div></div><div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant mt-space-xs"><span class="">CONTEXT HIT</span><span class="font-code-md text-code-md text-tertiary">94%</span></div><div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant"><span class="">THROUGHPUT</span><span class="font-code-md text-code-md text-secondary">4,120 T/s</span></div></div><button class="flex items-center justify-center gap-space-sm w-full py-space-sm px-space-md rounded bg-error-container text-on-error font-body-sm text-body-sm font-semibold hover:bg-error hover:text-on-error-container transition-colors shadow-[0_0_12px_rgba(239,68,68,0.25)]"><span class="material-symbols-outlined text-[16px]">power_settings_new</span><span class="">PAUSE PIPELINE</span></button></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-14 bg-surface/90 backdrop-blur-xl z-40 flex items-center justify-between px-margin shadow-[0_1px_8px_rgba(0,0,0,0.3)]"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs font-code-md text-code-md text-on-surface-variant"><span class="text-primary">synthetix</span><span class="">/</span><span class="">factory-prod</span><span class="">/</span><span class="text-on-surface">overview</span></div><div class="hidden xl:flex items-center gap-space-sm px-space-sm py-space-xs rounded bg-surface-container font-label-sm text-label-sm text-on-surface-variant"><span class="w-2 h-2 rounded-full bg-tertiary animate-ping"></span><span class="text-on-surface">99.8% Test Pass</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm bg-surface-container-low px-space-md py-space-xs rounded text-on-surface-variant focus-within:ring-1 focus-within:ring-primary"><span class="material-symbols-outlined text-[16px]">search</span><input class="bg-transparent font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none w-56" placeholder="Search pipelines, agents, diffs..." type="text"><kbd class="font-code-md text-code-md bg-surface-container px-1 rounded text-on-surface-variant/80">⌘K</kbd></div><button class="relative p-space-xs rounded hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary"></span></button><div class="flex items-center gap-space-sm pl-space-xs"><div class="flex flex-col text-right hidden sm:flex"><span class="font-body-sm text-body-sm text-on-surface font-medium leading-none">Alex Vance</span><span class="font-label-sm text-label-sm text-on-surface-variant leading-none mt-1">Staff Architect</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-primary/40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTpp2t-3QU9PijHmWRR1vDBFTFkC_RWwxu2U7nmPgv830gHnTsrReY7vdGKjuAj-v9mnRh_gx2aw4AAigc-3y65jUaEEN6vZiney16WQ317hoQvQWcmy24WAE1FhoIjisfpJOLltR6E1gbyvaa5hXNadOvBasiBnRGRmUiLDYyZji1_fWgzeN91yyxzZv1X-IAyXVc6fszR5ceeblSKCLihlZYjedhTy2QyLXiUWUa08BfuWOwSdiF"></div></div></header><main class="relative pt-14 w-full px-margin min-h-screen bg-surface"><div class="flex flex-col w-full pb-12 gap-space-xl">
+<!-- Top Telemetry & Control Bar -->
+<div class="flex flex-col gap-space-sm pt-space-xs">
+<div class="flex flex-wrap items-center justify-between gap-space-md">
+<!-- Breadcrumb Status -->
+<div class="flex items-center gap-space-sm">
+<div class="flex items-center gap-space-xs font-code-md text-code-md text-on-surface-variant"><span class="text-primary font-medium">synthetix</span><span class="text-outline-variant">/</span><span class="">factory-prod</span><span class="text-outline-variant">/</span><span class="text-on-surface">factory-overview</span></div>
+<span class="text-outline-variant">•</span>
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-tertiary/10 text-tertiary font-label-sm text-label-sm"><span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-ping"></span><span class="">6 SPECIALISTS ACTIVE</span></div>
+<div class="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded bg-primary/10 text-primary font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="">AUTONOMOUS VELOCITY OPTIMAL</span>
+</div>
+</div>
+<!-- Quick Action Controls -->
+<div class="flex items-center gap-space-sm">
+<button class="flex items-center gap-space-xs px-space-md py-1.5 rounded bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-body-sm text-body-sm transition-colors">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">picture_as_pdf</span>
+<span class="hidden md:inline">Download Summary</span>
+<span class="md:hidden">Export</span>
+</button>
+<div class="relative inline-block text-left">
+<button class="flex items-center gap-space-xs px-space-md py-1.5 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm transition-colors" id="timeframeBtn" onclick="document.getElementById('timeframeMenu').classList.toggle('hidden')">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">schedule</span>
+<span id="timeframeLabel" class="">Last 24 Hours</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">expand_more</span>
+</button>
+<div class="hidden absolute right-0 mt-1 w-44 rounded bg-surface-container-high shadow-xl py-1 z-30" id="timeframeMenu">
+<a class="block px-3 py-1.5 text-body-sm text-on-surface hover:bg-surface-container-highest" href="#" onclick="updateTimeframe('Last 6 Hours'); return false;">Last 6 Hours</a>
+<a class="block px-3 py-1.5 text-body-sm text-primary hover:bg-surface-container-highest" href="#" onclick="updateTimeframe('Last 24 Hours'); return false;">Last 24 Hours</a>
+<a class="block px-3 py-1.5 text-body-sm text-on-surface hover:bg-surface-container-highest" href="#" onclick="updateTimeframe('Last 7 Days'); return false;">Last 7 Days</a>
+<a class="block px-3 py-1.5 text-body-sm text-on-surface hover:bg-surface-container-highest" href="#" onclick="updateTimeframe('Current Sprint'); return false;">Current Sprint (v4.2)</a>
+</div>
+</div>
+<button class="flex items-center gap-space-xs px-space-lg py-1.5 rounded bg-primary-container text-on-primary-container font-headline-sm text-headline-sm font-semibold hover:brightness-110 transition-all shadow-[0_0_12px_rgba(6,182,212,0.3)]">
+<span class="material-symbols-outlined text-[16px]">add_circle</span>
+<span class="">Dispatch Custom Epic</span>
+</button>
+</div>
+</div>
+<!-- Title and Subtitle Block -->
+<div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-space-xs pt-space-xs">
+<div class="flex items-center gap-space-sm flex-wrap">
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">Software Factory Overview</h1>
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm bg-secondary-container/30 text-secondary font-medium tracking-wide">v4.2-autonomous</span>
+<span class="hidden lg:inline-flex items-center gap-1 font-label-sm text-label-sm text-tertiary">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+<span class="">Swarm Latency 24ms</span>
+</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-xl">
+        Executive telemetry, autonomous sprint delivery metrics, active synthesis pipeline, and swarm quorum health.
+      </p>
+</div>
+</div>
+<!-- KPI Summary Deck (5 Cards) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-space-md">
+<!-- KPI 1 -->
+<div class="flex flex-col justify-between p-space-md rounded bg-surface-container-low hover:bg-surface-container transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Output Velocity</span>
+<span class="material-symbols-outlined text-[18px] text-primary">merge_type</span>
+</div>
+<div class="my-space-xs">
+<div class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">48 PRs</div>
+<div class="font-body-sm text-body-sm text-tertiary flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span class="">+34% vs last week</span>
+</div>
+</div>
+<div class="font-code-md text-code-md text-on-surface-variant/80 pt-space-xs bg-surface-container-lowest/30 -mx-space-md -mb-space-md px-space-md py-1.5 rounded-b">
+<span class="">avg 4.2m spec-to-merge</span>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="flex flex-col justify-between p-space-md rounded bg-surface-container-low hover:bg-surface-container transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Code Synthesized</span>
+<span class="material-symbols-outlined text-[18px] text-tertiary">code_blocks</span>
+</div>
+<div class="my-space-xs">
+<div class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">142.8k <span class="font-body-md text-body-md text-on-surface-variant">LOC</span></div>
+<div class="font-body-sm text-body-sm text-tertiary flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+<span class="">99.8% Test Pass</span>
+</div>
+</div>
+<div class="font-code-md text-code-md text-on-surface-variant/80 pt-space-xs bg-surface-container-lowest/30 -mx-space-md -mb-space-md px-space-md py-1.5 rounded-b">
+<span class="">0 Architectural Drift</span>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="flex flex-col justify-between p-space-md rounded bg-surface-container-low hover:bg-surface-container transition-all"><div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Agent Team Pipeline</span><span class="material-symbols-outlined text-[18px] text-secondary">memory</span></div><div class="my-space-xs"><div class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">6 / 6 <span class="font-body-md text-body-md text-on-surface-variant">Active</span></div><div class="font-body-sm text-body-sm text-secondary flex items-center gap-1 mt-0.5"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="">100% Pipeline Load</span></div></div><div class="font-code-md text-code-md text-on-surface-variant/80 pt-space-xs bg-surface-container-lowest/30 -mx-space-md -mb-space-md px-space-md py-1.5 rounded-b"><span class="">Dedicated Pipeline Specialists</span></div></div>
+<!-- KPI 4 -->
+<div class="flex flex-col justify-between p-space-md rounded bg-surface-container-low hover:bg-surface-container transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Token &amp; Cost Burn</span>
+<span class="material-symbols-outlined text-[18px] text-primary">data_usage</span>
+</div>
+<div class="my-space-xs">
+<div class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">$384.20</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="font-code-md text-code-md text-primary">18.4M</span>
+<span class="">tokens consumed</span>
+</div>
+</div>
+<div class="font-code-md text-code-md text-on-surface-variant/80 pt-space-xs bg-surface-container-lowest/30 -mx-space-md -mb-space-md px-space-md py-1.5 rounded-b">
+<span class="">$3,840 / $5,000 monthly cap</span>
+</div>
+</div>
+<!-- KPI 5 -->
+<div class="flex flex-col justify-between p-space-md rounded bg-surface-container-low hover:bg-surface-container transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Zero-Intervention</span>
+<span class="material-symbols-outlined text-[18px] text-tertiary">auto_awesome</span>
+</div>
+<div class="my-space-xs">
+<div class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">88.4%</div>
+<div class="font-body-sm text-body-sm text-tertiary flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">format_image_left</span>
+<span class="">Auto-gated delivery</span>
+</div>
+</div>
+<div class="font-code-md text-code-md text-on-surface-variant/80 pt-space-xs bg-surface-container-lowest/30 -mx-space-md -mb-space-md px-space-md py-1.5 rounded-b"><span class="">Automated Pipeline Validation</span></div>
+</div>
+</div>
+<!-- Main 2-Column Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT COLUMN (65% width = 8 cols) -->
+<div class="lg:col-span-8 flex flex-col gap-space-lg min-w-0">
+<!-- Section A: Tasks in Progress -->
+<div class="flex flex-col rounded bg-surface-container-low overflow-hidden shadow-sm">
+<!-- Panel Header -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between px-space-md py-space-sm bg-surface-container gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[18px] text-primary">play_arrow</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Active Items &amp; Delivery Pipeline</span>
+<span class="px-1.5 py-0.5 rounded bg-primary-container/20 text-primary font-code-md text-code-md font-medium">7 in flight</span>
+</div>
+<!-- Filter Tabs -->
+<div class="flex items-center gap-1 bg-surface-container-lowest p-0.5 rounded font-label-sm text-label-sm overflow-x-auto"><button class="px-2 py-1 rounded text-on-surface-variant hover:text-on-surface whitespace-nowrap">All (7)</button><button class="px-2 py-1 rounded text-on-surface-variant hover:text-on-surface whitespace-nowrap">Queued</button><button class="px-2 py-1 rounded text-on-surface-variant hover:text-on-surface whitespace-nowrap">Spec &amp; Planning</button><button class="px-2 py-1 rounded bg-primary-container text-on-primary-container font-medium whitespace-nowrap">In Progress</button><button class="px-2 py-1 rounded text-on-surface-variant hover:text-on-surface whitespace-nowrap">Verification Gates</button><button class="px-2 py-1 rounded text-on-surface-variant hover:text-on-surface whitespace-nowrap">Awaiting Review</button></div>
+</div>
+<!-- Task Item 1 -->
+<div class="p-space-md flex flex-col gap-space-xs bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex flex-wrap items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="font-code-md text-code-md text-primary font-medium">TSK-1082</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Multi-tenant Stripe Webhook Retry Logic</span>
+<span class="px-1.5 py-0.5 rounded bg-secondary/10 text-secondary font-label-sm text-label-sm">High Priority</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="p-1 rounded text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors" title="Inspect Diff">
+<span class="material-symbols-outlined text-[16px]">difference</span>
+</button>
+<button class="p-1 rounded text-on-surface-variant hover:text-secondary hover:bg-surface-container-highest transition-colors" title="View Chain of Thought">
+<span class="material-symbols-outlined text-[16px]">psychology</span>
+</button>
+<button class="p-1 rounded text-on-surface-variant hover:text-error hover:bg-surface-container-highest transition-colors" title="Pause Task">
+<span class="material-symbols-outlined text-[16px]">pause</span>
+</button>
+</div>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<div class="flex items-center gap-space-md">
+<span class="flex items-center gap-1 text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="">Coder-TS + Architect-Prime</span>
+</span>
+<span class="">Phase: <strong class="text-secondary font-medium">Code Synthesis (Step 3/4)</strong></span>
+<span class="font-code-md text-code-md">3 files changed • ~1.4k tok</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="text-primary font-code-md text-code-md font-medium">78%</span>
+<span class="text-on-surface-variant/70">ETA: 45s</span>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden mt-0.5">
+<div class="h-full bg-primary rounded-full transition-all duration-500" style="width: 78%"></div>
+</div>
+</div>
+<div class="h-px bg-surface-container-high"></div>
+<!-- Task Item 2 -->
+<div class="p-space-md flex flex-col gap-space-xs bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex flex-wrap items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="font-code-md text-code-md text-primary font-medium">TSK-1077</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Granular RBAC Permission Matrix &amp; Drizzle Migration</span>
+<span class="px-1.5 py-0.5 rounded bg-tertiary/10 text-tertiary font-label-sm text-label-sm">Security Audit</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="p-1 rounded text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors" title="Inspect Diff">
+<span class="material-symbols-outlined text-[16px]">difference</span>
+</button>
+<button class="p-1 rounded text-on-surface-variant hover:text-secondary hover:bg-surface-container-highest transition-colors" title="View Chain of Thought">
+<span class="material-symbols-outlined text-[16px]">psychology</span>
+</button>
+<button class="p-1 rounded text-on-surface-variant hover:text-error hover:bg-surface-container-highest transition-colors" title="Pause Task">
+<span class="material-symbols-outlined text-[16px]">pause</span>
+</button>
+</div>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<div class="flex items-center gap-space-md">
+<span class="flex items-center gap-1 text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span class="">DB-Agent + Sentinel-Sec</span>
+</span>
+<span class="">Phase: <strong class="text-tertiary font-medium">Verification Gates (MicroVM sandbox)</strong></span>
+<span class="font-code-md text-code-md text-tertiary">+340 / -18 lines</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="text-tertiary font-code-md text-code-md font-medium">92%</span>
+<span class="text-on-surface-variant/70">ETA: 15s</span>
+</div>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden mt-0.5">
+<div class="h-full bg-tertiary rounded-full transition-all duration-500" style="width: 92%"></div>
+</div>
+</div>
+<div class="h-px bg-surface-container-high"></div>
+<!-- Task Item 3 -->
+<div class="p-space-md flex flex-col gap-space-xs bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex flex-wrap items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="font-code-md text-code-md text-primary font-medium">TSK-1094</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">Rate Limit Exponential Backoff for LLM Gateway</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">Standard</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="p-1 rounded text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors" title="Inspect Diff">
+<span class="material-symbols-outlined text-[16px]">difference</span>
+</button>
+<button class="p-1 rounded text-on-surface-variant hover:text-secondary hover:bg-surface-container-highest transition-colors" title="View Chain of Thought">
+<span class="material-symbols-outlined text-[16px]">psychology</span>
+</button>
+<button class="p-1 rounded text-on-surface-variant hover:text-error hover:bg-surface-container-highest transition-colors" title="Pause Task">
+<span class="material-symbols-outlined text-[16px]">pause</span>
+</button>
+</div>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<div class="flex items-center gap-space-md">
+<span class="flex items-center gap-1 text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="">Coder-TS</span>
+</span>
+<span class="">Phase: <strong class="text-primary font-medium">AST Parsing &amp; Test Generation</strong></span>
+<span class="font-code-md text-code-md">2 test suites added</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="text-primary font-code-md text-code-md font-medium">45%</span>
+<span class="text-on-surface-variant/70">ETA: 2m</span>
+</div>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden mt-0.5">
+<div class="h-full bg-primary rounded-full transition-all duration-500" style="width: 45%"></div>
+</div>
+</div>
+<div class="h-px bg-surface-container-high"></div>
+<!-- Task Item 4 -->
+<div class="p-space-md flex flex-col gap-space-xs bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex flex-wrap items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="font-code-md text-code-md text-primary font-medium">TSK-1102</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold truncate">OpenAPI Spec Synchronizer for v2 Billing Endpoints</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">Documentation</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="p-1 rounded text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors" title="Inspect Diff">
+<span class="material-symbols-outlined text-[16px]">difference</span>
+</button>
+<button class="p-1 rounded text-on-surface-variant hover:text-secondary hover:bg-surface-container-highest transition-colors" title="View Chain of Thought">
+<span class="material-symbols-outlined text-[16px]">psychology</span>
+</button>
+<button class="p-1 rounded text-on-surface-variant hover:text-error hover:bg-surface-container-highest transition-colors" title="Pause Task">
+<span class="material-symbols-outlined text-[16px]">pause</span>
+</button>
+</div>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<div class="flex items-center gap-space-md">
+<span class="flex items-center gap-1 text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="">DocGenie</span>
+</span>
+<span class="">Phase: <strong class="text-secondary font-medium">Schema validation</strong></span>
+<span class="font-code-md text-code-md">14 paths verified</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="text-secondary font-code-md text-code-md font-medium">60%</span>
+<span class="text-on-surface-variant/70">ETA: 1m 10s</span>
+</div>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden mt-0.5">
+<div class="h-full bg-secondary rounded-full transition-all duration-500" style="width: 60%"></div>
+</div>
+</div>
+</div>
+<!-- Section B: Factory Output Velocity & Swarm Burndown Chart -->
+
+</div>
+<!-- RIGHT COLUMN (35% width = 4 cols) -->
+<div class="lg:col-span-4 flex flex-col gap-space-lg min-w-0">
+<!-- Section C: Recent Shipped Milestones -->
+<div class="flex flex-col p-space-md rounded bg-surface-container-low shadow-sm">
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-tertiary">task_alt</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Shipped Milestones Today</h2>
+</div>
+<span class="font-label-sm text-label-sm text-tertiary font-medium">48 Merged</span>
+</div>
+<!-- Milestones Timeline -->
+<div class="flex flex-col gap-space-xs mt-space-xs divide-y divide-surface-container-high/60"><div class="flex items-center justify-between py-1.5 px-space-xs rounded hover:bg-surface-container/60 transition-colors"><div class="flex items-center gap-space-sm min-w-0 pr-2"><span class="w-2 h-2 rounded-full bg-tertiary flex-shrink-0"></span><span class="font-code-md text-code-md text-tertiary font-medium flex-shrink-0">#418</span><span class="font-body-sm text-body-sm text-on-surface font-medium truncate">Autonomous Multi-Tenant Org Billing System</span></div><span class="font-label-sm text-label-sm text-on-surface-variant/70 whitespace-nowrap flex-shrink-0">12m ago</span></div><div class="flex items-center justify-between py-1.5 px-space-xs rounded hover:bg-surface-container/60 transition-colors"><div class="flex items-center gap-space-sm min-w-0 pr-2"><span class="w-2 h-2 rounded-full bg-primary flex-shrink-0"></span><span class="font-code-md text-code-md text-primary font-medium flex-shrink-0">#417</span><span class="font-body-sm text-body-sm text-on-surface font-medium truncate">PostgreSQL Vector Partitioning Strategy</span></div><span class="font-label-sm text-label-sm text-on-surface-variant/70 whitespace-nowrap flex-shrink-0">48m ago</span></div><div class="flex items-center justify-between py-1.5 px-space-xs rounded hover:bg-surface-container/60 transition-colors"><div class="flex items-center gap-space-sm min-w-0 pr-2"><span class="w-2 h-2 rounded-full bg-secondary flex-shrink-0"></span><span class="font-code-md text-code-md text-secondary font-medium flex-shrink-0">#416</span><span class="font-body-sm text-body-sm text-on-surface font-medium truncate">Next.js 15 App Router Server Action Migration</span></div><span class="font-label-sm text-label-sm text-on-surface-variant/70 whitespace-nowrap flex-shrink-0">1h 35m ago</span></div><div class="flex items-center justify-between py-1.5 px-space-xs rounded hover:bg-surface-container/60 transition-colors"><div class="flex items-center gap-space-sm min-w-0 pr-2"><span class="w-2 h-2 rounded-full bg-outline flex-shrink-0"></span><span class="font-code-md text-code-md text-on-surface-variant font-medium flex-shrink-0">#415</span><span class="font-body-sm text-body-sm text-on-surface font-medium truncate">Redis Cluster Connection Pool Leak Guard</span></div><span class="font-label-sm text-label-sm text-on-surface-variant/70 whitespace-nowrap flex-shrink-0">2h 10m ago</span></div></div>
+<a class="flex items-center justify-between pt-space-md text-primary font-body-sm text-body-sm hover:underline mt-space-xs" href="#">
+<span class="">View all 48 completed tasks</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+<!-- Section D: Agent Swarm Health & Quorum Status -->
+<div class="flex flex-col p-space-md rounded bg-surface-container-low shadow-sm">
+<div class="flex items-center justify-between pb-space-sm"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-[18px] text-secondary">hub</span><h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Agent Team Pipeline</h2></div><span class="px-1.5 py-0.5 rounded bg-tertiary/10 text-tertiary font-label-sm text-label-sm">6 Specialists</span></div>
+<!-- Squad List -->
+<div class="flex flex-col gap-space-sm pt-space-xs"><div class="p-space-sm rounded bg-surface-container flex flex-col gap-1"><div class="flex items-center justify-between"><span class="font-body-sm text-body-sm text-on-surface font-semibold">Architect-Prime</span><span class="font-label-sm text-label-sm text-primary flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>Active</span></div><div class="font-code-md text-code-md text-on-surface-variant truncate">Architecture &amp; Spec Decomposition</div><div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant/70 pt-0.5"><span class="">Role</span><span class="text-primary font-medium">Stage 1 • Decomposition</span></div></div><div class="p-space-sm rounded bg-surface-container flex flex-col gap-1"><div class="flex items-center justify-between"><span class="font-body-sm text-body-sm text-on-surface font-semibold">CodeCraft</span><span class="font-label-sm text-label-sm text-tertiary flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>Active</span></div><div class="font-code-md text-code-md text-on-surface-variant truncate">Core Engine &amp; Code Synthesis</div><div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant/70 pt-0.5"><span class="">Role</span><span class="text-tertiary font-medium">Stage 2 • Synthesis</span></div></div><div class="p-space-sm rounded bg-surface-container flex flex-col gap-1"><div class="flex items-center justify-between"><span class="font-body-sm text-body-sm text-on-surface font-semibold">GateKeeper</span><span class="font-label-sm text-label-sm text-tertiary flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>Active</span></div><div class="font-code-md text-code-md text-on-surface-variant truncate">QA &amp; Verification Harness</div><div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant/70 pt-0.5"><span class="">Role</span><span class="text-tertiary font-medium">Stage 3 • Verification</span></div></div><div class="p-space-sm rounded bg-surface-container flex flex-col gap-1"><div class="flex items-center justify-between"><span class="font-body-sm text-body-sm text-on-surface font-semibold">SecOps-Vanguard</span><span class="font-label-sm text-label-sm text-secondary flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Active</span></div><div class="font-code-md text-code-md text-on-surface-variant truncate">Security &amp; AST Audit</div><div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant/70 pt-0.5"><span class="">Role</span><span class="text-secondary font-medium">Stage 4 • Security Guard</span></div></div><div class="p-space-sm rounded bg-surface-container flex flex-col gap-1"><div class="flex items-center justify-between"><span class="font-body-sm text-body-sm text-on-surface font-semibold">DocuForge</span><span class="font-label-sm text-label-sm text-primary flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>Active</span></div><div class="font-code-md text-code-md text-on-surface-variant truncate">Docs &amp; Spec Synthesizer</div><div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant/70 pt-0.5"><span class="">Role</span><span class="text-primary font-medium">Stage 5 • Sync &amp; Docs</span></div></div><div class="p-space-sm rounded bg-surface-container flex flex-col gap-1"><div class="flex items-center justify-between"><span class="font-body-sm text-body-sm text-on-surface font-semibold">SentryWatch</span><span class="font-label-sm text-label-sm text-tertiary flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>Active</span></div><div class="font-code-md text-code-md text-on-surface-variant truncate">Observability, Telemetry &amp; Incident Reports</div><div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant/70 pt-0.5"><span class="">Role</span><span class="text-tertiary font-medium">Stage 6 • Observability &amp; Telemetry</span></div></div></div>
+<!-- Telemetry Resource Micro-Gauges -->
+<div class="flex flex-col gap-space-xs mt-space-md pt-space-sm bg-surface-container-lowest/40 -mx-space-md -mb-space-md p-space-md rounded-b">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Pipeline Engine Telemetry</span>
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">GPU VRAM Cluster</span>
+<span class="font-code-md text-code-md text-primary">78% (624 GB / 800 GB)</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 78%"></div>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm mt-1">
+<span class="text-on-surface-variant">Prompt Context Cache Hit</span>
+<span class="font-code-md text-code-md text-tertiary">94.2%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary rounded-full" style="width: 94%"></div>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm mt-1">
+<span class="text-on-surface-variant">P99 Inference Latency</span>
+<span class="font-code-md text-code-md text-secondary">24.1 ms</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  function updateTimeframe(label) {
+    document.getElementById('timeframeLabel').textContent = label;
+    document.getElementById('timeframeMenu').classList.add('hidden');
+  }
+
+  // Close dropdown on outside click
+  document.addEventListener('click', function(event) {
+    const btn = document.getElementById('timeframeBtn');
+    const menu = document.getElementById('timeframeMenu');
+    if (btn && menu && !btn.contains(event.target) && !menu.contains(event.target)) {
+      menu.classList.add('hidden');
+    }
+  });
+</script></main></div>
+</body></html>
