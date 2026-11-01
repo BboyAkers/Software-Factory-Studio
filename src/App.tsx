@@ -18,7 +18,7 @@ import {
   SpecStudioPage,
   FleetTuningPage,
   SettingsPage
-} from './features';
+} from './pages';
 
 const MainLayout: React.FC = () => {
   const { currentTab } = useApp();

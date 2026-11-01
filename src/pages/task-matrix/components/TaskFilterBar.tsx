@@ -49,11 +49,11 @@ export const TaskFilterBar: React.FC<TaskFilterBarProps> = ({
         >
           <option value="all">All Agents</option>
           <option value="Architect-Prime">Architect-Prime</option>
-          <option value="SWE-Autopilot">SWE-Autopilot</option>
-          <option value="QA-Sentinel">QA-Sentinel</option>
-          <option value="Security-Auditor">Security-Auditor</option>
-          <option value="Doc-Synthesizer">Doc-Synthesizer</option>
-          <option value="DevOps-Runner">DevOps-Runner</option>
+          <option value="CodeCraft">CodeCraft</option>
+          <option value="GateKeeper">GateKeeper</option>
+          <option value="SecOps-Vanguard">SecOps-Vanguard</option>
+          <option value="DocuForge">DocuForge</option>
+          <option value="SentryWatch">SentryWatch</option>
         </select>
 
         {/* Priority Filter */}
