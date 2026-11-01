@@ -84,7 +84,7 @@ flowchart LR
   end
 
   subgraph External
-    GH["GitHub / GitLab"]
+    GH["GitHub"]
     JIRA["Jira / Linear"]
     SENTRY["Sentry / Datadog"]
     PROV["Model Providers"]
@@ -638,14 +638,34 @@ interface Envelope<E extends FactoryEvent = FactoryEvent> {
 
 | Integration | Direction | Mechanism | Notes |
 |-------------|-----------|-----------|-------|
-| GitHub / GitLab | ↔ | GitHub App (fine-grained), webhooks | Branch `factory/<wp-id>-<slug>`. PRs carry gate summaries as check runs |
+| GitHub | ↔ | Personal Access Token (PAT) or GitHub App, webhooks | Works with any individual developer repo or org repo. Branch `factory/<wp-id>-<slug>`. PRs carry gate summaries as check runs |
 | Jira / Linear | → intake, ← status sync | Webhooks + REST | Label `factory:auto` opts an issue in |
 | Sentry / Datadog | → intake | Alert webhooks | SentryWatch dedupes by fingerprint and only creates an Epic when no open Epic matches |
 | Slack | ← notify | Incoming webhook / app | Budget alerts, review requests, failures |
 | Model providers | ← | LLM gateway | Anthropic, OpenAI, DeepSeek, self-hosted (vLLM) |
 | Semgrep / Syft / Grype / gitleaks | internal | CLI in gate sandbox | Rule packs pinned and versioned |
 
-Integration toggles in Settings map to `PATCH /integrations/:id { enabled }`. Turning off a source-control integration **pauses** all workpacks targeting that repo.
+### 13.1 GitHub Integration & Individual Repository Connection
+
+Any individual developer can connect a personal GitHub repository (or organization repository) directly to the software factory without requiring enterprise infrastructure or organization admin privileges.
+
+1. **Developer Repository Onboarding Flow:**
+   - **Repository Identifier:** An individual provides a repo identifier in standard `<owner>/<repo>` format (e.g. `octocat/hello-world` or `BboyAkers/Software-Factory-Studio`) or standard repository URL.
+   - **Default Branch:** Defaults to `main` (or user-defined trunk branch `master`, `develop`).
+   - **Authentication Options:**
+     - **Personal Access Token (PAT):** Fine-grained personal token scoped exclusively to the target repository with permissions:
+       - `Contents: Read and write` (for branch creation and commit pushes)
+       - `Pull requests: Read and write` (for automated PR lifecycle management)
+       - `Checks: Read and write` (for deterministic Quality Gate status runs)
+       - `Webhooks: Read and write` (optional: automatic webhook setup)
+     - **GitHub App / OAuth:** Installed directly on a developer's personal account or team organization with select repository access.
+2. **Autonomous Swarm Operations on Connected Repositories:**
+   - **Branch Isolation:** Factory agents never commit directly to the default branch. All code changes are pushed to isolated workpack branches: `factory/<wp-id>-<slug>`.
+   - **Check Runs & Gate Summaries:** When GateKeeper executes deterministic Quality Sandboxes (typecheck, unit tests, integration tests, SAST), it posts GitHub Check Runs (`factory/gates/01-build`, `factory/gates/02-unit`, etc.) directly on the target commit.
+   - **Interactive Steering via PR Comments:** Individual developers can review the opened PR on GitHub and comment `@factory steer <instructions>` to steer running agents directly from GitHub's native code review interface.
+   - **Mainline Auto-Merge:** Controlled by the `autoMergeVerifiedPRs` governance toggle. When enabled and all gates are green, the factory fast-forward merges the PR into the default branch.
+
+Integration toggles in Settings map to `PATCH /integrations/:id { enabled }`. Turning off GitHub **pauses** all workpacks targeting that repo.
 
 ---
 

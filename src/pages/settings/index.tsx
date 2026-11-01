@@ -9,7 +9,8 @@ export const SettingsPage: React.FC = () => {
     integrations,
     policies,
     toggleIntegration,
-    togglePolicy
+    togglePolicy,
+    updateGitHubRepo
   } = useSettingsIntegrations();
 
   return (
@@ -20,7 +21,7 @@ export const SettingsPage: React.FC = () => {
           <div className="flex items-center gap-2 text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">
             <span className="text-primary font-mono">SYNTHETIX-CORE</span>
             <span className="text-on-surface-muted">/</span>
-            <span>ENTERPRISE-SETTINGS</span>
+            <span>SETTINGS-GATEWAYS</span>
             <span className="text-on-surface-muted">/</span>
             <span className="text-fluent-success flex items-center gap-1 font-semibold font-mono">
               <span className="w-1.5 h-1.5 rounded-full bg-fluent-success animate-pulse"></span>
@@ -34,14 +35,15 @@ export const SettingsPage: React.FC = () => {
             </span>
           </h1>
           <p className="text-[12.5px] text-on-surface-variant">
-            Infrastructure gateways, model API keys, deterministic security tripwires, and enterprise policies
+            Infrastructure gateways, GitHub repository sync, model API keys, deterministic security tripwires, and autonomous policies
           </p>
         </div>
 
-        {/* Enterprise Integrations Grid */}
+        {/* Integrations Grid */}
         <EnterpriseIntegrationsGrid
           integrations={integrations}
           onToggle={toggleIntegration}
+          onUpdateGitHubRepo={updateGitHubRepo}
         />
 
         {/* Lower Row: Safety Policies & Security Keys */}

@@ -1,3 +1,14 @@
+export interface ConnectedRepoConfig {
+  repoUrl: string;
+  defaultBranch: string;
+  authMethod: 'pat' | 'app';
+  token?: string;
+  webhookEnabled: boolean;
+  autoMergeEnabled: boolean;
+  connectedAt?: string;
+  lastSyncStatus?: 'synced' | 'syncing' | 'error';
+}
+
 export interface IntegrationItem {
   id: string;
   name: string;
@@ -6,6 +17,7 @@ export interface IntegrationItem {
   status: string;
   details: string;
   enabled: boolean;
+  repoConfig?: ConnectedRepoConfig;
 }
 
 export interface GovernancePolicyConfig {
@@ -14,3 +26,4 @@ export interface GovernancePolicyConfig {
   humanInTheLoopSignoff: boolean;
   strictSastScan: boolean;
 }
+

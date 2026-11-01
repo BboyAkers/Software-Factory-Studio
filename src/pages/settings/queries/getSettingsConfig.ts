@@ -4,12 +4,22 @@ export function getDefaultIntegrations(): IntegrationItem[] {
   return [
     {
       id: 'github',
-      name: 'GitHub Enterprise',
+      name: 'GitHub',
       category: 'Source Control',
       icon: 'commit',
       status: 'Connected',
-      details: 'repo: synthetix-corp/pipeline-prod • Webhook Active',
-      enabled: true
+      details: 'repo: BboyAkers/Software-Factory-Studio • branch: main • Webhook Active',
+      enabled: true,
+      repoConfig: {
+        repoUrl: 'BboyAkers/Software-Factory-Studio',
+        defaultBranch: 'main',
+        authMethod: 'pat',
+        token: 'ghp_••••••••••••••••••••••••••••••••••••',
+        webhookEnabled: true,
+        autoMergeEnabled: true,
+        connectedAt: '2026-10-31 18:30 UTC',
+        lastSyncStatus: 'synced'
+      }
     },
     {
       id: 'anthropic',

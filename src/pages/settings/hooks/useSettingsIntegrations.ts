@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../../../context/AppContext';
-import type { IntegrationItem, GovernancePolicyConfig } from '../lib/settingsModel';
+import type { IntegrationItem, GovernancePolicyConfig, ConnectedRepoConfig } from '../lib/settingsModel';
 import { getDefaultIntegrations, getDefaultPolicies } from '../queries/getSettingsConfig';
 import { useToggleIntegrationMutation } from '../mutations/useToggleIntegrationMutation';
 
@@ -40,10 +40,33 @@ export function useSettingsIntegrations() {
     });
   };
 
+  const updateGitHubRepo = (repoConfig: ConnectedRepoConfig) => {
+    setIntegrations((prev) =>
+      prev.map((item) => {
+        if (item.id === 'github') {
+          return {
+            ...item,
+            enabled: true,
+            status: 'Connected',
+            details: `repo: ${repoConfig.repoUrl} • branch: ${repoConfig.defaultBranch} • Webhook ${repoConfig.webhookEnabled ? 'Active' : 'Disabled'}`,
+            repoConfig
+          };
+        }
+        return item;
+      })
+    );
+    addToast({
+      type: 'success',
+      title: 'GitHub Repository Connected',
+      message: `Repository ${repoConfig.repoUrl} linked successfully (branch: ${repoConfig.defaultBranch}). Swarm agents are now synchronized.`
+    });
+  };
+
   return {
     integrations,
     policies,
     toggleIntegration,
-    togglePolicy
+    togglePolicy,
+    updateGitHubRepo
   };
-}
+};
