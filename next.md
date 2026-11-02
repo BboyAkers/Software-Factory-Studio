@@ -1,0 +1,201 @@
+Objective
+- Review docs/TECHNICAL_SPEC.md, flesh out its features, then build them in the Studio UI (this repo). The UI runs against an MSW-simulated backend. Non-spec UI is removed or replaced as each tab is built.
+Requirements
+- Original asks: "review the features in the technical spec and flesh them out more. Then build them out." and "review the UI and remove anything that isn't associated with the features".
+- The user took every recommended planning option:
+- Scope: Studio UI on a simulated backend (no real services).
+- Cleanup: remove or rework non-spec UI while building each area.
+- Spec Studio dispatch files a GitHub issue and the Epic forms from it.
+- Add .gitignore and untrack node_modules, dist and .DS_Store.
+- TDD seams the user confirmed (12): state machine, queue+SLA, budget, DSL, audit chain, RBAC, terminal policy, KPIs, eval gate, offline queue, stream reducer, and the fake-backend REST contract via msw/node.
+- TDD rule: tests are written only at agreed seams; ask before adding tests elsewhere.
+- Defaults the user did not object to:
+- TanStack Query/Router, zod, vitest, yaml, msw.
+- Keep the Fluent 2 tokens in src/index.css and the feature-slice layout (components/ hooks/ queries/ mutations/ lib/ routes.ts index.tsx).
+- Leave out PRD-only items: Active PR build-queue table, shipped-milestones feed, Auto-Release triggers.
+- No commits unless asked.
+- Project constraints:
+- tsconfig.app.json now has strict, noUncheckedIndexedAccess, erasableSyntaxOnly (no enums, namespaces or constructor parameter properties), noUnusedLocals, noUnusedParameters, verbatimModuleSyntax, types: ["vite/client"] only (no Node types in src/), and exclude: ["src/legacy"].
+- Text in new UI is never below 12px (spec §16.2).
+- Impeccable craft floor: no eyebrow kickers, no gradient text, no colored border-left > 1px, no emoji as icons, no em dashes in copy, modals only when needed.
+- States required: hover, focus, disabled, loading, error, empty.
+- Contrast ≥ 4.5:1.
+- Motion is 150–250ms and respects reduced motion.
+- oxlint src must exit 0 with no warnings.
+- Execution is meant to be uninterrupted through the phases.
+- Design references live in designs/<name>/screen.png and code.html (Fluent dark look). The spec overrides their content. They show things the spec removes: bell, GPU/VRAM readout, version badges, fixed identity.
+Decisions
+- Spec v0.3 resolved 23 v0.2 contradictions (Appx I).
+- Spec Studio dispatch files a GitHub issue with the factory label; the Epic forms from the webhook.
+- done is terminal, and rollback opens a revert workpack.
+- paused_reasons is an array.
+- queued_reason precedence: integration-off, budget, paused, deps, file-lock, capacity.
+- SLA breach sets escalated_at and never mutates priority.
+- Hard cap = monthly cap (pause, never fail); budget period = UTC calendar month.
+- One repo per project; Epic-scoped stepper; 33-capability RBAC matrix.
+- Promote is itself the Maintainer sign-off, so human-signoff never blocks canPromote.
+- API conventions:
+- Project-scoped endpoints send X-Project; SSE streams take ?project=.
+- Mock auth is Authorization: Bearer mock:<role>:<userId>:<urlencoded name>. Sockets and EventSource carry it as ?token=; SSE ignores auth in the mock.
+- Versioned workpack writes use If-Match (missing → 428, stale → 409 stale_version).
+- Mutations take Idempotency-Key; responses carry X-Server-Time.
+- Lists that are Paged: workpacks, epics, intake, audit, run logs, agent versions. Bounded sets are arrays.
+- Run logs page newest-first by log-seq cursor, each page oldest-first.
+- PATCH /workpacks/:id/status accepts cancelled, in-progress (needs text, acts as request-changes) and done (promote, Maintainer).
+- POST /pipeline/pause|resume return {status, affected}.
+- PipelineStatus carries awaitingReview and active. active = queued + running + awaitingReview, and equals what a global pause affects.
+- Mock backend:
+- MSW v3 import paths: msw/http, msw/sse, msw/ws, msw/browser, msw/node.
+- server.listen({ onUnhandledFrame: 'error' }) in tests; the worker uses 'bypass' and quiet: true.
+- SSE/WS handlers live only in the browser-only src/mocks/streams.ts (Node has no EventSource).
+- SSE heartbeat is a named heartbeat event; dropping a stream uses client.error() so the browser reconnects with Last-Event-ID.
+- Simulator defaults: pace(store, ms) divides delays by sim.speed; MICROS_PER_TOKEN = 4; turnMs 9000, planningMs 5000, gateMs 9000, intakeEveryMs 360000, previewMs 1400.
+- Simulator rules:
+- Admission needs dependencies done.
+- A failed or cancelled workpack with a fork is superseded.
+- Auto-merge needs the policy on, a fully-autonomous CodeCraft, no sign-off required and no override.
+- Gate failures retry up to 3 attempts; a SecOps veto fails immediately.
+- Seed world:
+- Dogfood project software-factory-studio (repo BboyAkers/Software-Factory-Studio, cap $1,500) plus empty `sandbox-demo` (cap $250).
+- 12 epics, 71 workpacks (8 running, 5 queued, 4 awaiting-review, 50 done, 2 archived).
+- Personas: Priya Nair (viewer, u-priya), Jonas Weber (engineer, u-jonas), Mira Okafor (maintainer, u-mira), Austin Akers (admin, u-austin, default).
+- Six scenarios: healthy, soft-limit, hard-cap, gate-failures, sla-pressure, quiet.
+- Frontend architecture:
+- src/legacy/ is read-only reference and is deleted at the end; page builders must not import it.
+- Page dirs src/pages/<tab>/ use the legacy tab names: overview, mission-control, task-matrix, live-workspace, quality-sandboxes, spec-studio, fleet-tuning, settings, audit.
+- URL segments: overview, mission, matrix, workspace, quality, spec, fleet, settings, audit, under /p/$project/… with optional params {-$wpId}, {-$runId}, {-$agentId}.
+- TanStack Router is code-based and the router type is not registered; navigation uses string helpers.
+- Search params are flat strings with custom parseSearch/stringifySearch (src/app/search.ts). Booleans are 1 or absent.
+- Each page's routes.ts exports path, SearchSchema (every field has a zod .catch fallback) and Search. The router derives validateSearch and stripSearchParams(defaults) from it and lazy-loads the page's default export.
+- Native <dialog> is used for Dialog and Drawer. Overlays portal into the enclosing <dialog> via portalRoot (the top layer hides body portals). ToastHost is a manual popover so toasts show above dialogs.
+- A control disabled for a role stays focusable via aria-disabled and disabledReason, which carries the role tooltip.
+- Reads name their project explicitly (read.x(p, …)). Writes are Call descriptors (write.*) sent via send(), and the same descriptor is queued offline.
+- useApiMutation handles idempotency, If-Match, optimistic patch with rollback, the offline queue (steering and Kanban moves only) and error toasts.
+- Mock-only extension slots in src/app/extensions.ts: extendUserMenu, extendRoot, extendSignIn. The shell never imports src/mocks; main.tsx guards the mock branch with VITE_USE_MOCKS !== 'false', which is static and drops MSW from non-mock builds.
+- Global overlays are rendered once by src/app/Overlays.tsx (Budget modal, command palette, New workpack dialog). Open them via ui.openBudget(), ui.openPalette(), ui.openNewWorkpack(preset).
+- Sign out clears the token and cache; a 401 also clears the token. The root then shows SignedOut (mock mode: persona picker; real mode: link to VITE_LOGIN_URL or /auth/login).
+- Tokens: --color-on-surface-muted is #9a9a9a; --color-fluent-danger-text and --color-fluent-purple-text are text-safe tints; use fluent-blue-light for accent text.
+- Process:
+- Domain seams were test-first; handlers and simulator were tested through HTTP.
+- Tests added beyond the seed list: src/mocks/seeds/world.test.ts and src/mocks/control.test.ts. Flag both in the final summary.
+- Page subagents own their page dir, may add files only under src/components/ui/ (and their own shared dirs), must not edit package.json, and update their DESIGN.md.
+- Idempotency store now keeps only a hash of the request body (longHash in src/mocks/http.ts), not the raw body.
+- Port 5173 on this machine belongs to an unrelated project (codetv-challenge/ui, pid 12564). Do not kill it.
+Work State
+Completed
+- Hygiene and tooling:
+- .gitignore, untracked node_modules, dist and .DS_Store (staged deletions, uncommitted).
+- Deps installed, vitest config, public/mockServiceWorker.js.
+- package.json scripts: test, test:watch, typecheck.
+- Spec v0.3 in docs/TECHNICAL_SPEC.md. This session §10.2 gained GET /repository, GET /benchmarks/latest, richer PATCH /workpacks/:id/status, the {status, affected} pause response, and the PipelineStatus fields.
+- src/contracts/*, src/domain/* (11 tested seams plus queryKeys, format, steering), and the full mock backend (core plus platform).
+- Platform subagent ses_e6a5ea2c9ffe73tJ2pjuOt90YZ finished: fleet, settings, audit, overview, search; agentCatalog, connect, platform seed.
+- Contract additions this session: BenchmarkLatestSchema, AgentCycleResultSchema, ConnectivityResultSchema, SlackTestResultSchema.
+- Review fixes applied from the platform report:
+- epics.test.ts and lifecycle.test.ts now flip the seeded GitHub integration instead of pushing a second one.
+- syncAgentStatus honors manualCycleActive.
+- The idempotency fingerprint is hashed.
+- backend/settings.ts imports ConnectivityResult from contracts.
+- Gates at last check: tsc exit 0, oxlint exit 0, vitest 702 passing across 26 files.
+- Shared API layer, including the platform half:
+- src/api/{state,client,endpoints,queries,mutations,errors,stream,terminal}.ts.
+- client.ts gained requestText (for the audit export) and 401 → sign-out.
+- endpoints.ts has read.* and write.* for agent, integration, policies, slack, token, vault, benchmark and project connect.
+- queries.ts has q.* and use* hooks for agents, versions, fleetStats, models, integrations, policies, slack, token, vault (takes an allowed flag), repository, overviewMetrics, health, latestBenchmark, audit, auditVerify, search.
+- queryKeys.ts gained benchmark and auditVerify.
+- Platform page agents add their own useApiMutation hooks in pages/<m>/mutations/ from the write.* descriptors.
+- UI primitives in src/components/ui/ (barrel index.ts). This session:
+- portal.ts, Tooltip side='right' and className, Menu items with description and current, Drawer placement and size="sm", buttonClass().
+- IconButton now supports loading.
+- Popover keydown refactored to a switch.
+- CSS for toast and left-drawer animation.
+- App layer in src/app/:
+- ui.ts, extensions.ts, search.ts (parseSearch, stringifySearch, searchFlag, searchText, searchChoice).
+- session.tsx (useSession, useCan, <Can>, useSignOut), nav.tsx (PAGES, href, AppLink, useGo, useRouteIds, useCurrentPage, useSearchState).
+- usePageTitle.ts, useMediaQuery.ts, ToastHost.tsx, Fallbacks.tsx (RoutePending, RouteError, NotFoundPage, PageNotFound, NoProjects, SignedOut).
+- Overlays.tsx, routes.tsx (route tree and createAppRouter), App.tsx, offline.ts (selectOfflineProject is a no-op for the same project).
+- Layout and shell:
+- src/components/layout/Page.tsx (Page with scroll="page|contain", PageHeader).
+- src/components/shell/: AppShell, NavPane (+ MobileNav), NavItems, PipelineControls, Header, ProjectSwitcher, Breadcrumb, PausedPill, BudgetPill, ConnectionPill, UserMenu, Banners, useShellEffects, pill.ts.
+- The shell wires the stream, global alerts, offline replay and ⌘K.
+- Stubs for the three overlays: src/components/budget/BudgetModal.tsx, src/components/palette/CommandPalette.tsx, src/components/workpack/NewWorkpackDialog.tsx.
+- Nine page stubs (routes.ts + index.tsx) with search schemas per spec §16.2.
+- Mock tooling:
+- src/mocks/DevPanel.tsx (right-edge panel with every Appx H control).
+- src/mocks/PersonaPicker.tsx (renamed from Personas.tsx to avoid a casing clash with personas.ts).
+- src/mocks/boot.tsx (bootMocks() registers the tooling).
+- src/main.tsx rewritten; index.html cleaned (title "Software Factory Studio", JetBrains Mono and Material Symbols only).
+Active
+- Browser smoke test of the real app.
+- The Vite dev server is running in the background on http://localhost:5180 (started with npm run dev -- --port 5180 --strictPort).
+- The Chrome DevTools MCP cannot attach (no DevToolsActivePort; the user's Chrome has no remote debugging).
+- Fallback chosen: puppeteer-core driving system Chrome 156 headlessly from /private/var/folders/6_/nnc80kys76b58wkgblmvcf4r0000gn/T/opencode/e2e. It is installed there (outside the repo). The first script write was interrupted, so no script exists yet.
+Blocked
+- (none)
+Next Move
+1. Write and run the puppeteer smoke scripts in the e2e scratch dir. Launch /Applications/Google Chrome.app/Contents/MacOS/Google Chrome headless with a temp profile against http://localhost:5180/.
+- Check: service worker registered (MSW serves REST), no console errors, the shell renders, the connection pill reaches "Live" (SSE connects and replays), nav badges derive from data, each of the 9 tabs loads, and the WebSocket terminal works.
+- Check the dev panel: persona switch, scenario, offline toggle, drop stream.
+- Check the 800px icon rail and the mobile drawer, plus screenshots.
+- Fix whatever breaks. Likely risks: the stripSearchParams and loose router typings at runtime, popover and dialog behavior, ensureQueryData and notFound flows.
+2. Write docs/FRONTEND_GUIDE.md for page subagents:
+- Layering, queries and mutations (useApiMutation, write.*), <Can> and useCan.
+- useNow and the stream hooks, routing helpers and useSearchState, Page/PageHeader.
+- The primitives catalog and the ui.* overlays, the state checklist (loading, empty, error, offline, forbidden, conflict), and design rules including designs/ references.
+- Ownership, test rules (no new tests without asking), and the mock-mode extension slots.
+- Note that src/legacy is reference only.
+- Optionally add shared domain components that pages would otherwise duplicate: StatusBadge, PriorityBadge, SLA/paused/blocked chips, RelativeTime, AgentChip.
+3. Spawn parallel page subagents, each reading its §16.x section plus the guide:
+- Task Matrix (+ task drawer, Epic drawer, New Workpack dialog in src/components/workpack/), Mission Control, Live Workspace, Quality.
+- Spec Studio (+ intake feed), Fleet & Tuning (+ drawer), Budget modal (src/components/budget/).
+- Settings (+ connect wizard), Overview, Audit Log, Command palette (src/components/palette/).
+4. Finish:
+- Delete src/legacy/.
+- Refresh per-page DESIGN.md files and the README.
+- Run npm run typecheck, npm run lint, npm test, npm run build.
+- Do a browser click-through of every tab, including empty, error, offline and role states.
+- Stop the background dev server.
+- Final summary: flag the extra tests (world.test.ts, control.test.ts), the uncommitted state (nothing committed), and any spec drift.
+Relevant Files
+- docs/TECHNICAL_SPEC.md: v0.3 spec; §16 per-module acceptance criteria, §10 API, Appx G/H/I.
+- src/app/routes.tsx: route tree, createAppRouter, root and signed-out handling.
+- src/app/nav.tsx: PAGES, AppLink, useGo, useSearchState and other routing helpers.
+- src/app/session.tsx: useSession, useCan, <Can>, useSignOut.
+- src/components/shell/AppShell.tsx: the project layout. Sibling files hold the nav, header, pills and banners.
+- src/api/endpoints.ts and src/api/queries.ts: all read, write and q bindings; src/api/mutations.ts has the shared mutation hooks.
+- src/api/stream.ts: useFactoryStream, useRunStream, useFactoryEvents, useConnection.
+- src/components/ui/index.ts: primitives barrel.
+- src/mocks/boot.tsx and src/mocks/DevPanel.tsx: mock-mode boot and tooling; src/mocks/index.ts has startMocks().
+- src/mocks/handlers/index.ts and src/mocks/backend/simulator.ts: REST registry and the tick loop.
+- src/mocks/seeds/{index,dogfood,specs,platform}.ts: the seed world and scenarios.
+- src/domain/queryKeys.ts and src/domain/streamReducer.ts: keys, and event-to-cache patching by key prefix.
+- src/pages/*/routes.ts and src/pages/*/index.tsx: page stubs to replace.
+- src/legacy/: old UI, reference only; delete at the end.
+- designs/*/screen.png: visual direction references.
+Important Context
+- Nothing is committed. The index has staged deletions of node_modules, dist and .DS_Store; all other work is modified or untracked.
+- Platform subagent ses_e6a5ea2c9ffe73tJ2pjuOt90YZ is finished; no subagents are running.
+- A background dev server is running on port 5180 (shell id sh_196f20c8a001aYiisX2ghoS2wg). Stop it when done.
+- Tooling gotchas:
+- Run vitest with npx --no-install vitest run <file>.
+- edit takes oldString/newString/path; the wrong names silently fail.
+- macOS sed -i '' needs the empty-string argument.
+- Never grep inside node_modules source maps.
+- macOS is case-insensitive: avoid files differing only by case (personas.ts vs Personas.tsx).
+- Several long single tool calls were cut off this session, and some empty tool calls were issued by mistake. Keep calls small, always include all required arguments, and split large files.
+- Mock facts:
+- Run ids run-N, workpacks WP-28xx, epics EPIC-10xx, intake intake-N, audit aud-N, run-log ids log-<seq>.
+- Await flushAudit(ps) before reading audit.
+- The composer run src/pages/mission-control/hooks/useSteer.ts has a human lock.
+- On load, the fleet Epic decomposes after about 20 s, connect starts after about 1 s, and log-viewer leaves planning after about 22 s.
+- The session token is persisted in localStorage key factory.token; the offline queue in factory.offline.<project>.
+- GET /vault/keys needs Maintainer; pass allowed=false to useVault for lower roles.
+- A global pause affects every non-terminal workpack.
+- Stream reducer limitation: run.token_delta patches only single-object run entries (e.g. keys.run), not arrays.
+- Platform backend behavior to know:
+- Seeded GateKeeper v2 is evaluating at ~110/200 and finishes on tick.
+- Autonomy-only saves skip the eval.
+- SentryWatch cycles are counter-based.
+- A disabled provider shows offline.
+- Per-agent 24h cost and tokens are derived from the last 24h of the ledger plus a seeded background.
+- The spec lists "DESIGN.md" per page. Page agents rewrite their own; the legacy DESIGN.md files sit under src/legacy/pages/*.
