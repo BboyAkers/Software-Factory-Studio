@@ -1,9 +1,9 @@
-import type { FeatureRouteConfig } from '../overview/routes';
+import { z } from 'zod';
 
-export const specStudioRoute: FeatureRouteConfig = {
-  id: 'spec-studio',
-  path: '/spec-studio',
-  title: 'Spec Studio — Synthetix Swarm OS',
-  description: 'Autonomous PRD and architecture synthesis with automated workpack decomposition',
-  icon: 'prompt_suggestion'
-};
+/** Path below `/p/$project`. Optional params open a drawer or focus an item. */
+export const path = 'spec';
+
+/** Every field has a fallback, so a hand-edited URL never breaks the page. */
+export const SearchSchema = z.object({});
+
+export type Search = z.infer<typeof SearchSchema>;

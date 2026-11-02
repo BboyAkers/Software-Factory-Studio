@@ -28,10 +28,14 @@
   --color-fluent-danger-subtle: rgba(239, 68, 68, 0.15);
   --color-fluent-purple: #8b5cf6;
   --color-fluent-purple-subtle: rgba(139, 92, 246, 0.15);
+  /* Red and purple read too dim as small text on dark surfaces; these are the text-safe tints (≥ 5:1). */
+  --color-fluent-danger-text: #f87171;
+  --color-fluent-purple-text: #a78bfa;
 
   --color-on-surface: #f3f3f3;
   --color-on-surface-variant: #adadad;
-  --color-on-surface-muted: #757575;
+  /* 5.5:1 on cards: the old #757575 was 3.4:1, under the 4.5:1 floor for text. */
+  --color-on-surface-muted: #9a9a9a;
 
   --color-fluent-border: rgba(255, 255, 255, 0.08);
   --color-fluent-border-high: rgba(255, 255, 255, 0.15);
@@ -158,5 +162,89 @@
   @apply bg-white/5 border border-white/8 border-b-white/40 transition-all duration-150;
   &:focus-within {
     @apply bg-white/8 border-b-2 border-b-[#118dff] ring-1 ring-[#118dff]/25;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Dialogs and drawers use the native <dialog>: focus trap, Esc, and   */
+/* focus restore come from the browser. Motion is 150–200 ms and only  */
+/* says where the surface came from.                                   */
+/* ------------------------------------------------------------------ */
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+dialog[open] {
+  animation: dialog-in 160ms ease-out;
+}
+
+dialog[open][data-side='right'] {
+  animation: drawer-in 200ms ease-out;
+}
+
+dialog[open][data-side='left'] {
+  animation: drawer-in-left 200ms ease-out;
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+
+@keyframes drawer-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog[open],
+  dialog[open][data-side='right'],
+  dialog[open][data-side='left'] {
+    animation: none;
+  }
+  .skeleton,
+  .spinner,
+  .toast {
+    animation: none !important;
+  }
+  * {
+    scroll-behavior: auto !important;
+  }
+}
+
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 }

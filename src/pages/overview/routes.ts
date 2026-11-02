@@ -1,16 +1,12 @@
-export interface FeatureRouteConfig {
-  id: string;
-  path: string;
-  title: string;
-  description: string;
-  icon: string;
-  badge?: string;
-}
+import { z } from 'zod';
+import { searchChoice } from '../../app/search';
 
-export const overviewRoute: FeatureRouteConfig = {
-  id: 'overview',
-  path: '/overview',
-  title: 'Overview — Synthetix Swarm OS',
-  description: 'Factory-wide autonomous telemetry, KPI metrics, and assembly pipeline',
-  icon: 'grid_view'
-};
+/** Path below `/p/$project`. Optional params open a drawer or focus an item. */
+export const path = 'overview';
+
+/** Every field has a fallback, so a hand-edited URL never breaks the page. */
+export const SearchSchema = z.object({
+  window: searchChoice(['24h', '7d'], '24h'),
+});
+
+export type Search = z.infer<typeof SearchSchema>;
