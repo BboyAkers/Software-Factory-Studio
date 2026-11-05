@@ -1049,4 +1049,28 @@ describe('connecting a repository', () => {
       expect(saved.body).toMatchObject({ version: 2, status: 'evaluating' });
     });
   });
+
+  describe('disconnect', () => {
+    it('is for an admin and needs no project header', async () => {
+      await expectNeeds('admin', 'DELETE', '/projects/proj', undefined, null);
+    });
+
+    it('disconnects and removes the project repository', async () => {
+      const res = await w.call<{ ok: boolean; projectId: string }>('DELETE', '/projects/proj', { project: null, role: 'admin' });
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ ok: true, projectId: 'proj' });
+
+      // Project is removed from /projects and /me
+      const projects = (await w.call<Project[]>('GET', '/projects', { project: null })).body;
+      expect(projects.map((p) => p.id)).not.toContain('proj');
+
+      const me = (await w.call<Me>('GET', '/me', { project: null })).body;
+      expect(me.projects.map((p) => p.id)).not.toContain('proj');
+    });
+
+    it('answers 404 if the project does not exist', async () => {
+      const res = await w.call<Problem>('DELETE', '/projects/does-not-exist', { project: null, role: 'admin' });
+      expect(res.status).toBe(404);
+    });
+  });
 });

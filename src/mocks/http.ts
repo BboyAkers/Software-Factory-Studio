@@ -5,7 +5,7 @@ import { ROLES } from '../contracts';
 import { ROLE_LABEL, can, requiredRole, type Capability } from '../domain/rbac';
 import { longHash } from './backend/codegen';
 import { nowIso } from './backend/runtime';
-import type { Actor, ProjectState, Store } from './backend/store';
+import { SYSTEM_ACTOR, type Actor, type ProjectState, type Store } from './backend/store';
 
 /** Build a matcher that works for any origin, in the browser and in Node tests. */
 export const api = (path: string): string => `*/api/v1${path}`;
@@ -68,8 +68,10 @@ export type RouteHandler<B> = (ctx: RouteContext<B>) => unknown | Promise<unknow
 export interface RouteOptions<B> {
   capability?: Capability;
   body?: z.ZodType<B>;
-  /** `global` routes (`/me`, `/projects`, `/projects/connect*`) take no project. Default `project`. */
+  /** `global` routes (`/me`, `/projects`, `/projects/connect*`, `/webhooks/*`) take no project. Default `project`. */
   scope?: 'project' | 'global';
+  /** 'none' allows unauthenticated requests such as external webhooks. Default 'user'. */
+  auth?: 'user' | 'none';
   /** Success status for a returned value. Default 200. */
   status?: number;
 }
@@ -150,7 +152,8 @@ export function createRouter(getStore: () => Store, options: RouterOptions = {})
         if (latency !== 0) await sleep(latency[0] + Math.random() * (latency[1] - latency[0]));
 
         try {
-          const actor = parseAuth(request.headers.get('authorization'));
+          const isWebhook = opts.auth === 'none';
+          const actor = parseAuth(request.headers.get('authorization')) ?? (isWebhook ? SYSTEM_ACTOR : null);
           if (!actor) throw new ApiProblem(401, 'unauthorized', 'Sign in to continue.');
 
           const url = new URL(request.url);
@@ -193,6 +196,12 @@ export function createRouter(getStore: () => Store, options: RouterOptions = {})
             const parsed = opts.body.safeParse(parsedJson);
             if (!parsed.success) throw invalid(issuesToErrors(parsed.error));
             body = parsed.data;
+          } else if (rawBody !== '') {
+            try {
+              body = JSON.parse(rawBody);
+            } catch {
+              body = rawBody;
+            }
           }
 
           const flat: Record<string, string> = {};

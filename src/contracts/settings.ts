@@ -134,6 +134,12 @@ export const ConnectRequestSchema = z.object({
 });
 export type ConnectRequest = z.infer<typeof ConnectRequestSchema>;
 
+export const DisconnectProjectResponseSchema = z.object({
+  ok: z.boolean(),
+  projectId: z.string(),
+});
+export type DisconnectProjectResponse = z.infer<typeof DisconnectProjectResponseSchema>;
+
 export const PreflightCheckSchema = z.object({
   id: z.string(),
   label: z.string(),

@@ -1,8 +1,9 @@
 import { useResumePipeline } from '../../api/mutations';
 import { usePipelineStatus } from '../../api/queries';
 import { useConnection } from '../../api/stream';
+import { useGo } from '../../app/nav';
 import { useOfflineQueue } from '../../app/offline';
-import { Can } from '../../app/session';
+import { Can, useSession } from '../../app/session';
 import { ui } from '../../app/ui';
 import { useNow } from '../../app/useNow';
 import { relativeTime } from '../../domain/format';
@@ -13,6 +14,8 @@ const STRIP = 'border-x-0 border-t-0';
 
 export function Banners() {
   const status = usePipelineStatus();
+  const { project } = useSession();
+  const go = useGo();
   const { state } = useConnection();
   const queued = useOfflineQueue().length;
   const resume = useResumePipeline();
@@ -61,6 +64,21 @@ export function Banners() {
         >
           Pipeline paused by {data.pausedBy ?? 'someone'}
           {data.pausedAt && <span className="text-on-surface-variant"> {relativeTime(data.pausedAt, now)}</span>}.
+        </Banner>
+      )}
+
+      {project && !project.repo && (
+        <Banner
+          tone="warning"
+          icon="add_link"
+          className={STRIP}
+          action={
+            <Button size="sm" icon="add_link" onClick={() => void go('settings', { search: { section: 'connect' } })}>
+              Connect repository
+            </Button>
+          }
+        >
+          No GitHub repository is connected to this project. Connect to GitHub to coordinate autonomous synthesis and verification.
         </Banner>
       )}
     </div>

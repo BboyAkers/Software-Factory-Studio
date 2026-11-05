@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router';
 import { useCurrentPage, useGo } from '../../app/nav';
 import { useCan, useSession } from '../../app/session';
 import { Icon, Menu, Skeleton, type MenuItem } from '../ui';
@@ -10,6 +11,7 @@ export function ProjectSwitcher() {
   const { project, projects, projectId } = useSession();
   const page = useCurrentPage();
   const go = useGo();
+  const navigate = useNavigate();
   const connect = useCan('project.connect');
 
   if (!project) return <Skeleton className="h-8 w-44" />;
@@ -22,14 +24,34 @@ export function ProjectSwitcher() {
         description: p.repo,
         icon: 'folder',
         current: p.id === projectId,
-        onSelect: () => void go(page?.segment ?? 'overview', { project: p.id }),
+        onSelect: () => {
+          try {
+            globalThis.localStorage?.setItem('factory.selected_project', p.id);
+          } catch {
+            // ignore
+          }
+          void go(page?.segment ?? 'overview', { project: p.id });
+        },
       }),
     ),
+    {
+      id: 'switch_repo',
+      label: 'Switch or select repository...',
+      icon: 'sync_alt',
+      separatorBefore: true,
+      onSelect: () => {
+        try {
+          globalThis.localStorage?.removeItem('factory.selected_project');
+        } catch {
+          // ignore
+        }
+        void navigate({ to: '/', search: { switch: true } });
+      },
+    },
     {
       id: 'connect',
       label: 'Connect repository',
       icon: 'add_link',
-      separatorBefore: true,
       disabled: !connect.allowed,
       ...(connect.reason ? { reason: connect.reason } : {}),
       onSelect: () => void go('settings', { search: { section: 'connect' } }),

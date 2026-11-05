@@ -33,6 +33,25 @@ export function startMocks(): Promise<MockControl> {
     startSimulator(store);
     const control = createControl(store, { terminalClients: () => streams.terminalClients });
     window.__factoryMock = control;
+
+    if (import.meta.hot) {
+      import.meta.hot.on('github-webhook', async (payload: { headers?: Record<string, string>; body?: unknown; event?: string; delivery?: string }) => {
+        try {
+          await fetch('/api/v1/webhooks/github', {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              ...(payload.event ? { 'x-github-event': payload.event } : {}),
+              ...(payload.delivery ? { 'x-github-delivery': payload.delivery } : {}),
+            },
+            body: JSON.stringify(payload.body ?? {}),
+          });
+        } catch (err) {
+          console.error('[HMR Webhook] Ingest error:', err);
+        }
+      });
+    }
+
     return control;
   })();
   return started;

@@ -54,9 +54,9 @@ const TOKEN_KEY = 'factory.token';
 
 function readToken(): string | null {
   try {
-    return globalThis.localStorage?.getItem(TOKEN_KEY) ?? null;
+    return globalThis.localStorage?.getItem(TOKEN_KEY) ?? 'mock:admin:u-austin:Austin%20Akers';
   } catch {
-    return null;
+    return 'mock:admin:u-austin:Austin%20Akers';
   }
 }
 

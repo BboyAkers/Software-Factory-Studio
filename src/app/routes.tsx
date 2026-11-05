@@ -15,9 +15,10 @@ import * as settings from '../pages/settings/routes';
 import * as spec from '../pages/spec-studio/routes';
 import * as matrix from '../pages/task-matrix/routes';
 import { useExtensions } from './extensions';
-import { NoProjects, NotFoundPage, PageNotFound, RouteError, RoutePending, SignedOut } from './Fallbacks';
+import { NotFoundPage, PageNotFound, RouteError, RoutePending, SignedOut } from './Fallbacks';
 import { selectOfflineProject } from './offline';
 import { parseSearch, stringifySearch } from './search';
+import { SelectOrConnectRepo, SELECTED_PROJECT_KEY } from './SelectOrConnectRepo';
 import { ToastHost } from './ToastHost';
 
 interface RouterContext {
@@ -41,16 +42,29 @@ function Root() {
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({ component: Root });
 
-/** `/` goes to the first project's overview. */
+/** `/`: asks to connect to GitHub & select repo, unless one is already selected in localStorage. */
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  beforeLoad: async ({ context }) => {
-    const me = await context.queryClient.ensureQueryData(q.me());
-    const first = me.projects[0];
-    if (first) throw redirect({ to: '/p/$project/overview', params: { project: first.id }, replace: true });
+  validateSearch: (search: Record<string, unknown>) => ({
+    switch: search.switch === 'true' || search.switch === true,
+  }),
+  beforeLoad: async ({ context, search }) => {
+    if (search.switch) return;
+    let saved: string | null = null;
+    try {
+      saved = globalThis.localStorage?.getItem(SELECTED_PROJECT_KEY);
+    } catch {
+      // storage unavailable
+    }
+    if (saved) {
+      const me = await context.queryClient.ensureQueryData(q.me());
+      if (me.projects.some((p) => p.id === saved)) {
+        throw redirect({ to: '/p/$project/overview', params: { project: saved }, replace: true });
+      }
+    }
   },
-  component: NoProjects,
+  component: SelectOrConnectRepo,
 });
 
 /** `/p/:project`: checks the project exists, tells the API client which one it is, and mounts the shell. */
@@ -60,6 +74,11 @@ const projectRoute = createRoute({
   beforeLoad: async ({ params, context }) => {
     const me = await context.queryClient.ensureQueryData(q.me());
     if (!me.projects.some((project) => project.id === params.project)) throw notFound({ data: { project: params.project } });
+    try {
+      globalThis.localStorage?.setItem(SELECTED_PROJECT_KEY, params.project);
+    } catch {
+      // storage unavailable
+    }
     setCurrentProject(params.project);
     selectOfflineProject(params.project);
   },

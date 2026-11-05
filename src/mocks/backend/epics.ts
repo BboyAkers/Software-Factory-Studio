@@ -41,7 +41,7 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 
 export const intakeLabel = (ps: ProjectState): string => ps.repository?.intakeLabel ?? 'factory';
 const repoName = (ps: ProjectState): string => ps.repository?.fullName ?? ps.project.repo;
-const issueUrl = (ps: ProjectState, number: number): string => `https://github.com/${repoName(ps)}/issues/${number}`;
+export const issueUrl = (ps: ProjectState, number: number): string => `https://github.com/${repoName(ps)}/issues/${number}`;
 const studioUrl = (ps: ProjectState, path: string): string => `https://studio.factory.dev/p/${ps.project.id}/${path}`;
 const isClosed = (epic: Epic): boolean => epic.status === 'completed' || epic.status === 'failed' || epic.status === 'cancelled';
 

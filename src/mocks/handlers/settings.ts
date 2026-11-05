@@ -1,7 +1,7 @@
 import type { HttpHandler } from 'msw/http';
 import { z } from 'zod';
 import { ConnectRequestSchema, GateIdSchema, PutVaultKeyRequestSchema, UpdatePoliciesRequestSchema, UpdateSlackRequestSchema } from '../../contracts';
-import { connectProject, runPreflight } from '../backend/connect';
+import { connectProject, disconnectProject, runPreflight } from '../backend/connect';
 import {
   deleteVaultKey,
   integrationById,
@@ -79,5 +79,15 @@ export function settingsHandlers(r: Router): HttpHandler[] {
     r.post('/projects/connect', { scope: 'global', capability: 'project.connect', body: ConnectRequestSchema, status: 201 }, ({ store, actor, body }) =>
       connectProject(store, body, actor),
     ),
+
+    r.delete('/projects/:projectId', { scope: 'global', capability: 'project.connect' }, ({ store, actor, params }) => {
+      const projectId = params.projectId ?? '';
+      return disconnectProject(store, projectId, actor);
+    }),
+
+    r.post('/projects/:projectId/disconnect', { scope: 'global', capability: 'project.connect' }, ({ store, actor, params }) => {
+      const projectId = params.projectId ?? '';
+      return disconnectProject(store, projectId, actor);
+    }),
   ];
 }

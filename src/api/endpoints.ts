@@ -17,6 +17,8 @@ import {
   FileContentSchema,
   FleetStatsSchema,
   GatesResponseSchema,
+  DisconnectProjectResponseSchema,
+  GitHubWebhookResponseSchema,
   HealthSchema,
   IntakeEventSchema,
   IntegrationSchema,
@@ -289,10 +291,18 @@ export const write = {
     start: () => call({ method: 'POST', path: '/benchmarks', schema: BenchmarkStartSchema }),
   },
 
+  /** Webhooks endpoint for GitHub deliveries and synthetic tests. */
+  webhook: {
+    github: (body: Record<string, unknown>) =>
+      call({ method: 'POST', path: '/webhooks/github', body, schema: GitHubWebhookResponseSchema }),
+  },
+
   /** Not scoped to a project: the server ignores `X-Project` for these. */
   project: {
     preflight: (body: { repo: string; token: string; defaultBranch?: string }) =>
       call({ method: 'POST', path: '/projects/connect/preflight', body, schema: PreflightResultSchema }),
     connect: (body: ConnectRequest) => call({ method: 'POST', path: '/projects/connect', body, schema: ProjectSchema }),
+    disconnect: (projectId: string) =>
+      call({ method: 'DELETE', path: `/projects/${projectId}`, schema: DisconnectProjectResponseSchema }),
   },
 };

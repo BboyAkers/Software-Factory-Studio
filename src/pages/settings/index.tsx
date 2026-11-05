@@ -1,13 +1,46 @@
 import { usePageTitle } from '../../app/usePageTitle';
 import { Page, PageHeader } from '../../components/layout/Page';
-import { EmptyState } from '../../components/ui';
+import { Badge } from '../../components/ui';
+import { useSession } from '../../app/session';
+import { useSearchState } from '../../app/nav';
+import { SearchSchema } from './routes';
+import { GitHubConnectionCard } from './components/GitHubConnectionCard';
 
 export default function SettingsPage() {
   usePageTitle('Settings');
+  const { role } = useSession();
+  const [search, setSearch] = useSearchState(SearchSchema);
+
+  const isConnectModalOpen = search.section === 'connect';
+
+  const handleOpenConnectModal = () => {
+    setSearch({ section: 'connect' });
+  };
+
+  const handleCloseConnectModal = () => {
+    setSearch({ section: undefined });
+  };
+
   return (
-    <Page>
-      <PageHeader title="Settings" />
-      <EmptyState icon="settings" title="Settings is being built" description="This page is a placeholder until its feature module lands." />
+    <Page scroll="page">
+      <PageHeader
+        title="Settings & Integrations"
+        description="Source control repositories, autonomous guardrails, external integrations, model provider keys, and telemetry."
+        meta={
+          <Badge tone="purple" icon="shield_person">
+            Role: {role.toUpperCase()}
+          </Badge>
+        }
+      />
+
+      <div className="space-y-6">
+        {/* GitHub Connection Card */}
+        <GitHubConnectionCard
+          isConnectModalOpen={isConnectModalOpen}
+          onOpenConnectModal={handleOpenConnectModal}
+          onCloseConnectModal={handleCloseConnectModal}
+        />
+      </div>
     </Page>
   );
 }

@@ -1,6 +1,6 @@
 import type { ConnectRequest, FieldError, PreflightCheck, PreflightResult, Project } from '../../contracts';
 import { REQUIRED_PAT_PERMISSIONS } from '../../contracts';
-import { ApiProblem, conflict } from '../http';
+import { ApiProblem, conflict, notFound } from '../http';
 import { nowMs, recordAudit } from './runtime';
 import { createProjectState, type Actor, type Store } from './store';
 import { seedPlatform } from '../seeds/platform';
@@ -215,3 +215,18 @@ export function connectProject(store: Store, request: ConnectRequest, actor: Act
   });
   return project;
 }
+
+/** Disconnect and remove a project repository from Software Factory Studio. */
+export function disconnectProject(store: Store, projectId: string, actor: Actor): { ok: boolean; projectId: string } {
+  const ps = store.projects.get(projectId);
+  if (!ps) throw notFound('Project', projectId);
+
+  recordAudit(ps, actor, 'project.disconnected', {
+    projectId,
+    repo: ps.project.repo,
+  });
+
+  store.projects.delete(projectId);
+  return { ok: true, projectId };
+}
+
