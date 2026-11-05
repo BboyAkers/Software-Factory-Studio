@@ -45,12 +45,12 @@ function usePanel(open: boolean, onClose: () => void, anchor: React.RefObject<HT
     document.addEventListener('pointerdown', onPointer);
     document.addEventListener('keydown', onKey);
     window.addEventListener('resize', onClose);
-    window.addEventListener('scroll', onClose, true);
+    window.addEventListener('scroll', onClose, { capture: true, passive: true });
     return () => {
       document.removeEventListener('pointerdown', onPointer);
       document.removeEventListener('keydown', onKey);
       window.removeEventListener('resize', onClose);
-      window.removeEventListener('scroll', onClose, true);
+      window.removeEventListener('scroll', onClose, { capture: true });
     };
   }, [open, onClose, anchor]);
 

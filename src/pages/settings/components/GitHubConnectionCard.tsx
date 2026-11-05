@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRepository, useIntegrations } from '../../../api/queries';
 import { useCan, useSession } from '../../../app/session';
 import { useGo } from '../../../app/nav';
 import { useNow } from '../../../app/useNow';
 import { relativeTime } from '../../../domain/format';
 import { connectionStore, deriveConnection } from '../../../api/state';
-import { SELECTED_PROJECT_KEY } from '../../../app/SelectOrConnectRepo';
+import { clearSelectedProject, setSelectedProject } from '../../../app/SelectOrConnectRepo';
 import {
   Badge,
   Button,
@@ -34,6 +34,35 @@ const PERMISSION_DESCRIPTIONS: Record<string, string> = {
   'Deployments: Read': 'Track staging deployment state after merging to trunk',
   'Metadata: Read': 'Inspect repository details and default branch configuration',
 };
+
+const LOADING_SKELETON_CARD = (
+  <Card className="p-5">
+    <div className="flex items-center justify-between border-b border-fluent-border pb-4">
+      <div className="flex items-center gap-3">
+        <Skeleton className="size-10 rounded-lg" />
+        <div className="space-y-1.5">
+          <Skeleton className="h-5 w-48" />
+          <Skeleton className="h-4 w-72" />
+        </div>
+      </div>
+      <Skeleton className="h-8 w-28 rounded-md" />
+    </div>
+    <div className="mt-5 space-y-4">
+      <Skeleton className="h-12 w-full rounded-md" />
+      <Skeleton className="h-24 w-full rounded-md" />
+    </div>
+  </Card>
+);
+
+const ACTIVE_WEBHOOK_SUBSCRIPTIONS = (
+  <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-on-surface-muted">
+    <span className="font-medium text-on-surface-variant">Active Subscriptions:</span>
+    <span className="rounded bg-white/5 px-2 py-0.5 font-mono text-white">issues (Intake)</span>
+    <span className="rounded bg-white/5 px-2 py-0.5 font-mono text-white">issue_comment (@factory steer)</span>
+    <span className="rounded bg-white/5 px-2 py-0.5 font-mono text-white">pull_request (Merge)</span>
+    <span className="rounded bg-white/5 px-2 py-0.5 font-mono text-white">ping (Health)</span>
+  </div>
+);
 
 interface GitHubConnectionCardProps {
   onOpenConnectModal?: () => void;
@@ -72,26 +101,31 @@ export function GitHubConnectionCard({
   const testMutation = useTestIntegrationMutation();
   const disconnectMutation = useDisconnectProjectMutation();
 
-  const gitHubIntegration = integrations?.find((i) => i.id === 'github');
+  const gitHubIntegration = useMemo(
+    () => integrations?.find((i) => i.id === 'github'),
+    [integrations],
+  );
   const isPaused = gitHubIntegration?.enabled === false || gitHubIntegration?.status === 'paused';
-  const isConnected = !!repository;
+  const isConnected = Boolean(repository);
+
+  // Build O(1) lookup map for repository token permissions (js-index-maps)
+  const permissionsByName = useMemo(() => {
+    const map = new Map<string, boolean>();
+    if (!repository) return map;
+    for (const perm of repository.permissions) {
+      map.set(perm.name, perm.granted);
+    }
+    return map;
+  }, [repository]);
 
   const handleConfirmDisconnect = async () => {
     try {
       await disconnectMutation.mutateAsync(currentProjectId);
       setDisconnectConfirmOpen(false);
-      try {
-        globalThis.localStorage?.removeItem(SELECTED_PROJECT_KEY);
-      } catch {
-        // storage unavailable
-      }
+      clearSelectedProject();
       const remaining = projects.filter((p) => p.id !== currentProjectId);
       if (remaining.length > 0 && remaining[0]) {
-        try {
-          globalThis.localStorage?.setItem(SELECTED_PROJECT_KEY, remaining[0].id);
-        } catch {
-          // storage unavailable
-        }
+        setSelectedProject(remaining[0].id);
         void go('overview', { project: remaining[0].id });
       } else {
         window.location.href = '/?switch=true';
@@ -159,8 +193,8 @@ export function GitHubConnectionCard({
       const data = await res.json();
       if (res.ok && data.ok) {
         setWebhookTestMessage({ ok: true, text: 'Webhook verified! Ping event acknowledged.' });
-        await refetchRepo();
-        await refetchIntegrations();
+        // Run independent refetches in parallel to avoid a waterfall (async-parallel)
+        await Promise.all([refetchRepo(), refetchIntegrations()]);
       } else {
         setWebhookTestMessage({ ok: false, text: data.message || 'Verification failed.' });
       }
@@ -172,24 +206,7 @@ export function GitHubConnectionCard({
   };
 
   if (repoLoading || intLoading) {
-    return (
-      <Card className="p-5">
-        <div className="flex items-center justify-between border-b border-fluent-border pb-4">
-          <div className="flex items-center gap-3">
-            <Skeleton className="size-10 rounded-lg" />
-            <div className="space-y-1.5">
-              <Skeleton className="h-5 w-48" />
-              <Skeleton className="h-4 w-72" />
-            </div>
-          </div>
-          <Skeleton className="h-8 w-28 rounded-md" />
-        </div>
-        <div className="mt-5 space-y-4">
-          <Skeleton className="h-12 w-full rounded-md" />
-          <Skeleton className="h-24 w-full rounded-md" />
-        </div>
-      </Card>
-    );
+    return LOADING_SKELETON_CARD;
   }
 
   if (repoError) {
@@ -199,8 +216,7 @@ export function GitHubConnectionCard({
           error={repoError}
           title="Could not load GitHub integration details"
           onRetry={() => {
-            void refetchRepo();
-            void refetchIntegrations();
+            void Promise.all([refetchRepo(), refetchIntegrations()]);
           }}
         />
       </Card>
@@ -243,7 +259,7 @@ export function GitHubConnectionCard({
 
           {/* Top Right Header Controls */}
           <div className="flex flex-wrap items-center gap-3">
-            {isConnected && (
+            {isConnected ? (
               <div className="flex items-center gap-2 border-r border-fluent-border pr-3">
                 <Toggle
                   label={<span className="text-[12px] font-medium text-white">Sync Enabled</span>}
@@ -259,7 +275,7 @@ export function GitHubConnectionCard({
                   onChange={handleToggle}
                 />
               </div>
-            )}
+            ) : null}
 
             <Button
               variant={isConnected ? 'secondary' : 'primary'}
@@ -278,7 +294,7 @@ export function GitHubConnectionCard({
               {isConnected ? 'Connect Another Repo' : 'Connect Repository'}
             </Button>
 
-            {isConnected && (
+            {isConnected ? (
               <Button
                 variant="danger"
                 size="sm"
@@ -295,7 +311,7 @@ export function GitHubConnectionCard({
               >
                 Disconnect Repo
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -405,7 +421,7 @@ export function GitHubConnectionCard({
 
                 <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
                   {REQUIRED_PAT_PERMISSIONS.map((permName) => {
-                    const granted = repository.permissions.find((p) => p.name === permName)?.granted ?? true;
+                    const granted = permissionsByName.get(permName) ?? true;
                     const desc = PERMISSION_DESCRIPTIONS[permName] ?? 'Repository scope for swarm operations';
 
                     return (
@@ -472,14 +488,14 @@ export function GitHubConnectionCard({
                       size="sm"
                       icon="sensors"
                       loading={testingWebhook}
-                      onClick={handleTestWebhook}
+                      onClick={() => void handleTestWebhook()}
                       disabled={isOffline}
                     >
                       Send Test Ping
                     </Button>
                   </div>
 
-                  {webhookTestMessage && (
+                  {webhookTestMessage ? (
                     <div
                       className={`text-[12px] flex items-center gap-1.5 p-2 rounded ${
                         webhookTestMessage.ok
@@ -490,15 +506,9 @@ export function GitHubConnectionCard({
                       <Icon name={webhookTestMessage.ok ? 'check_circle' : 'error'} size={15} />
                       <span>{webhookTestMessage.text}</span>
                     </div>
-                  )}
+                  ) : null}
 
-                  <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-on-surface-muted">
-                    <span className="font-medium text-on-surface-variant">Active Subscriptions:</span>
-                    <span className="rounded bg-white/5 px-2 py-0.5 font-mono text-white">issues (Intake)</span>
-                    <span className="rounded bg-white/5 px-2 py-0.5 font-mono text-white">issue_comment (@factory steer)</span>
-                    <span className="rounded bg-white/5 px-2 py-0.5 font-mono text-white">pull_request (Merge)</span>
-                    <span className="rounded bg-white/5 px-2 py-0.5 font-mono text-white">ping (Health)</span>
-                  </div>
+                  {ACTIVE_WEBHOOK_SUBSCRIPTIONS}
                 </div>
               </div>
 

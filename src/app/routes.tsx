@@ -18,7 +18,7 @@ import { useExtensions } from './extensions';
 import { NotFoundPage, PageNotFound, RouteError, RoutePending, SignedOut } from './Fallbacks';
 import { selectOfflineProject } from './offline';
 import { parseSearch, stringifySearch } from './search';
-import { SelectOrConnectRepo, SELECTED_PROJECT_KEY } from './SelectOrConnectRepo';
+import { SelectOrConnectRepo, getSelectedProject, setSelectedProject } from './SelectOrConnectRepo';
 import { ToastHost } from './ToastHost';
 
 interface RouterContext {
@@ -51,12 +51,7 @@ const indexRoute = createRoute({
   }),
   beforeLoad: async ({ context, search }) => {
     if (search.switch) return;
-    let saved: string | null = null;
-    try {
-      saved = globalThis.localStorage?.getItem(SELECTED_PROJECT_KEY);
-    } catch {
-      // storage unavailable
-    }
+    const saved = getSelectedProject();
     if (saved) {
       const me = await context.queryClient.ensureQueryData(q.me());
       if (me.projects.some((p) => p.id === saved)) {
@@ -74,11 +69,7 @@ const projectRoute = createRoute({
   beforeLoad: async ({ params, context }) => {
     const me = await context.queryClient.ensureQueryData(q.me());
     if (!me.projects.some((project) => project.id === params.project)) throw notFound({ data: { project: params.project } });
-    try {
-      globalThis.localStorage?.setItem(SELECTED_PROJECT_KEY, params.project);
-    } catch {
-      // storage unavailable
-    }
+    setSelectedProject(params.project);
     setCurrentProject(params.project);
     selectOfflineProject(params.project);
   },

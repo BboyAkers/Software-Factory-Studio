@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   useAgents,
@@ -24,7 +24,7 @@ import {
   Tooltip,
   cx,
 } from '../../../components/ui';
-import type { Agent, Integration, ModelCatalogEntry } from '../../../contracts';
+import type { Agent, Integration, ModelCatalogEntry, ProviderStat } from '../../../contracts';
 import { relativeTime } from '../../../domain/format';
 import { useRotateProviderKeyMutation } from '../mutations/useRotateProviderKeyMutation';
 import { useTestIntegrationMutation } from '../mutations/useTestIntegrationMutation';
@@ -82,6 +82,45 @@ const PROVIDER_META: Record<ModelProviderId, ProviderMeta> = {
 
 const PROVIDER_ORDER: readonly ModelProviderId[] = ['anthropic', 'openai', 'deepseek'];
 
+const LOADING_SKELETON_CARD = (
+  <Card className="p-5">
+    <div className="flex items-center justify-between border-b border-fluent-border pb-4">
+      <div className="flex items-center gap-3">
+        <Skeleton className="size-10 rounded-lg" />
+        <div className="space-y-1.5">
+          <Skeleton className="h-5 w-56" />
+          <Skeleton className="h-4 w-80" />
+        </div>
+      </div>
+      <Skeleton className="h-8 w-32 rounded-md" />
+    </div>
+    <div className="mt-5 space-y-4">
+      <Skeleton className="h-32 w-full rounded-md" />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Skeleton className="h-48 w-full rounded-md" />
+        <Skeleton className="h-48 w-full rounded-md" />
+        <Skeleton className="h-48 w-full rounded-md" />
+      </div>
+    </div>
+  </Card>
+);
+
+const ZERO_READBACK_GUARANTEE_BADGE = (
+  <span className="inline-flex items-center gap-1.5 text-[11px] text-on-surface-muted">
+    <Icon name="verified_user" size={14} className="text-fluent-success" />
+    <span>Zero-readback guarantee: keys are never exposed in API reads, logs, or SSE streams.</span>
+  </span>
+);
+
+const MULTI_PROVIDER_FAILOVER_NOTE = (
+  <div className="flex items-start gap-2.5 rounded-md border border-fluent-border bg-white/[0.01] p-3 text-[12px] text-on-surface-variant">
+    <Icon name="hub" size={16} className="mt-0.5 text-fluent-blue-light" />
+    <div className="leading-5">
+      <strong className="text-white">Multi-Provider Failover &amp; Key Isolation:</strong> Every specialist agent is configured with a primary model and cross-provider fallbacks (for example, <code className="font-mono text-[11px] text-white">anthropic/claude-sonnet</code> failing over to <code className="font-mono text-[11px] text-white">deepseek/deepseek-v3</code> and <code className="font-mono text-[11px] text-white">openai/gpt-4o</code>). Imported provider keys are used strictly by the Factory LLM gateway and are never injected into sandbox test containers.
+    </div>
+  </div>
+);
+
 function ProviderGlyph({ providerId, size = 18 }: { providerId: ModelProviderId; size?: number }) {
   if (providerId === 'anthropic') {
     return (
@@ -112,31 +151,6 @@ interface AgentProviderUsage {
   agent: Agent;
   roleType: 'primary' | 'fallback';
   modelIds: string[];
-}
-
-function getAgentUsageForProvider(agents: Agent[] | undefined, providerId: ModelProviderId): AgentProviderUsage[] {
-  if (!agents) return [];
-  const usages: AgentProviderUsage[] = [];
-
-  for (const agent of agents) {
-    const primaryMatches = agent.config.model.primary.startsWith(`${providerId}/`);
-    const fallbackMatches = agent.config.model.fallbacks.filter((m) => m.startsWith(`${providerId}/`));
-
-    if (primaryMatches) {
-      usages.push({
-        agent,
-        roleType: 'primary',
-        modelIds: [agent.config.model.primary, ...fallbackMatches],
-      });
-    } else if (fallbackMatches.length > 0) {
-      usages.push({
-        agent,
-        roleType: 'fallback',
-        modelIds: fallbackMatches,
-      });
-    }
-  }
-  return usages;
 }
 
 interface ImportProviderKeyFormValues {
@@ -193,24 +207,94 @@ export function ModelProviderKeysCard() {
   const toggleMutation = useToggleIntegrationMutation();
   const testMutation = useTestIntegrationMutation();
 
-  const providerIntegrations: Integration[] = PROVIDER_ORDER.map((id) => {
-    const found = integrations?.find((i) => i.id === id);
-    if (found) return found;
-    return {
-      id,
-      name: PROVIDER_META[id].name,
-      category: 'Model provider',
-      status: 'connected',
-      enabled: true,
-      details: PROVIDER_META[id].tagline,
-      lastVerifiedAt: null,
-      webhookUrl: null,
-    };
-  });
+  // Build O(1) lookup maps once per data change instead of filtering inside render loops (js-index-maps & js-combine-iterations)
+  const providerIntegrationsById = useMemo((): Record<ModelProviderId, Integration> => {
+    const byId = new Map<string, Integration>();
+    for (const item of integrations ?? []) {
+      byId.set(item.id, item);
+    }
+    const result = {} as Record<ModelProviderId, Integration>;
+    for (const id of PROVIDER_ORDER) {
+      result[id] = byId.get(id) ?? {
+        id,
+        name: PROVIDER_META[id].name,
+        category: 'Model provider',
+        status: 'connected',
+        enabled: true,
+        details: PROVIDER_META[id].tagline,
+        lastVerifiedAt: null,
+        webhookUrl: null,
+      };
+    }
+    return result;
+  }, [integrations]);
 
-  const activeCount = providerIntegrations.filter((p) => p.enabled && p.status !== 'disconnected').length;
+  const modelsByProvider = useMemo((): Record<ModelProviderId, ModelCatalogEntry[]> => {
+    const grouped: Record<ModelProviderId, ModelCatalogEntry[]> = {
+      anthropic: [],
+      openai: [],
+      deepseek: [],
+    };
+    for (const m of models ?? []) {
+      grouped[m.provider].push(m);
+    }
+    return grouped;
+  }, [models]);
+
+  const agentUsagesByProvider = useMemo((): Record<ModelProviderId, AgentProviderUsage[]> => {
+    const grouped: Record<ModelProviderId, AgentProviderUsage[]> = {
+      anthropic: [],
+      openai: [],
+      deepseek: [],
+    };
+    if (!agents) return grouped;
+
+    for (const agent of agents) {
+      for (const providerId of PROVIDER_ORDER) {
+        const prefix = `${providerId}/`;
+        const primaryMatches = agent.config.model.primary.startsWith(prefix);
+        const fallbackMatches = agent.config.model.fallbacks.filter((m) => m.startsWith(prefix));
+
+        if (primaryMatches) {
+          grouped[providerId].push({
+            agent,
+            roleType: 'primary',
+            modelIds: [agent.config.model.primary, ...fallbackMatches],
+          });
+        } else if (fallbackMatches.length > 0) {
+          grouped[providerId].push({
+            agent,
+            roleType: 'fallback',
+            modelIds: fallbackMatches,
+          });
+        }
+      }
+    }
+    return grouped;
+  }, [agents]);
+
+  const providerStatsById = useMemo((): Map<ModelProviderId, ProviderStat> => {
+    const map = new Map<ModelProviderId, ProviderStat>();
+    for (const stat of fleetStats?.providers ?? []) {
+      map.set(stat.id, stat);
+    }
+    return map;
+  }, [fleetStats]);
+
+  const activeCount = useMemo(
+    () =>
+      PROVIDER_ORDER.reduce((count, id) => {
+        const p = providerIntegrationsById[id];
+        return p.enabled && p.status !== 'disconnected' ? count + 1 : count;
+      }, 0),
+    [providerIntegrationsById],
+  );
+
   const selectedMeta = PROVIDER_META[selectedProvider];
-  const selectedIntegration = providerIntegrations.find((p) => p.id === selectedProvider);
+  const selectedIntegration = providerIntegrationsById[selectedProvider];
+  const selectedProviderModelNames = modelsByProvider[selectedProvider]
+    .map((m) => m.displayName)
+    .join(', ');
 
   const handleSelectProviderForImport = (providerId: ModelProviderId, focusInput = false) => {
     setValue('providerId', providerId);
@@ -239,7 +323,7 @@ export function ModelProviderKeysCard() {
       setShowKey(false);
 
       // If the provider was paused/disabled, automatically enable it so agents can use the newly imported key
-      if (selectedIntegration && !selectedIntegration.enabled) {
+      if (!selectedIntegration.enabled) {
         await toggleMutation.mutateAsync({ id: values.providerId, enabled: true });
       }
 
@@ -305,28 +389,7 @@ export function ModelProviderKeysCard() {
   };
 
   if (intLoading) {
-    return (
-      <Card className="p-5">
-        <div className="flex items-center justify-between border-b border-fluent-border pb-4">
-          <div className="flex items-center gap-3">
-            <Skeleton className="size-10 rounded-lg" />
-            <div className="space-y-1.5">
-              <Skeleton className="h-5 w-56" />
-              <Skeleton className="h-4 w-80" />
-            </div>
-          </div>
-          <Skeleton className="h-8 w-32 rounded-md" />
-        </div>
-        <div className="mt-5 space-y-4">
-          <Skeleton className="h-32 w-full rounded-md" />
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <Skeleton className="h-48 w-full rounded-md" />
-            <Skeleton className="h-48 w-full rounded-md" />
-            <Skeleton className="h-48 w-full rounded-md" />
-          </div>
-        </div>
-      </Card>
-    );
+    return LOADING_SKELETON_CARD;
   }
 
   if (intError) {
@@ -432,10 +495,10 @@ export function ModelProviderKeysCard() {
             >
               {PROVIDER_ORDER.map((id) => {
                 const meta = PROVIDER_META[id];
-                const integration = providerIntegrations.find((p) => p.id === id);
+                const integration = providerIntegrationsById[id];
                 const isSelected = selectedProvider === id;
-                const providerModels = (models ?? []).filter((m) => m.provider === id);
-                const agentUsages = getAgentUsageForProvider(agents, id);
+                const providerModels = modelsByProvider[id];
+                const agentUsages = agentUsagesByProvider[id];
 
                 return (
                   <button
@@ -470,7 +533,7 @@ export function ModelProviderKeysCard() {
                       </div>
                       <StatusDot
                         tone={
-                          !integration?.enabled || integration.status === 'paused'
+                          !integration.enabled || integration.status === 'paused'
                             ? 'warning'
                             : integration.status === 'connected'
                               ? 'success'
@@ -494,10 +557,7 @@ export function ModelProviderKeysCard() {
                 <span>
                   Expected prefix: <code className="font-mono text-white">{selectedMeta.keyPrefix}</code> · Write-only credential for{' '}
                   <span className="text-white font-medium">
-                    {(models ?? [])
-                      .filter((m) => m.provider === selectedProvider)
-                      .map((m) => m.displayName)
-                      .join(', ') || selectedMeta.name}
+                    {selectedProviderModelNames || selectedMeta.name}
                   </span>
                 </span>
               }
@@ -565,14 +625,11 @@ export function ModelProviderKeysCard() {
               <span>Run a 1-token connectivity probe immediately after importing key</span>
             </label>
 
-            <span className="inline-flex items-center gap-1.5 text-[11px] text-on-surface-muted">
-              <Icon name="verified_user" size={14} className="text-fluent-success" />
-              <span>Zero-readback guarantee: keys are never exposed in API reads, logs, or SSE streams.</span>
-            </span>
+            {ZERO_READBACK_GUARANTEE_BADGE}
           </div>
 
           {/* Inline Feedback Banner */}
-          {feedbackBanner && (
+          {feedbackBanner ? (
             <div
               role="status"
               className={cx(
@@ -586,9 +643,9 @@ export function ModelProviderKeysCard() {
                 <Icon name={feedbackBanner.ok ? 'check_circle' : 'error'} size={16} className="mt-0.5 shrink-0" />
                 <div>
                   <div className="font-semibold text-white">{feedbackBanner.title}</div>
-                  {feedbackBanner.detail && (
+                  {feedbackBanner.detail ? (
                     <div className="mt-0.5 text-on-surface-variant">{feedbackBanner.detail}</div>
-                  )}
+                  ) : null}
                 </div>
               </div>
               <button
@@ -600,7 +657,7 @@ export function ModelProviderKeysCard() {
                 <Icon name="close" size={15} />
               </button>
             </div>
-          )}
+          ) : null}
         </form>
 
         {/* Provider Cards Grid: Status, Models, Agent Assignments, and Actions */}
@@ -617,10 +674,10 @@ export function ModelProviderKeysCard() {
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
             {PROVIDER_ORDER.map((providerId) => {
               const meta = PROVIDER_META[providerId];
-              const integration = providerIntegrations.find((p) => p.id === providerId)!;
-              const providerModels: ModelCatalogEntry[] = (models ?? []).filter((m) => m.provider === providerId);
-              const agentUsages = getAgentUsageForProvider(agents, providerId);
-              const stat = fleetStats?.providers.find((p) => p.id === providerId);
+              const integration = providerIntegrationsById[providerId];
+              const providerModels = modelsByProvider[providerId];
+              const agentUsages = agentUsagesByProvider[providerId];
+              const stat = providerStatsById.get(providerId);
               const isPaused = !integration.enabled || integration.status === 'paused';
               const isTesting = testingProviderId === providerId && testMutation.isPending;
 
@@ -686,7 +743,7 @@ export function ModelProviderKeysCard() {
                           {integration.lastVerifiedAt ? relativeTime(integration.lastVerifiedAt, now) : 'Not verified'}
                         </span>
                       </div>
-                      {stat && (
+                      {stat ? (
                         <>
                           <div className="border-t border-white/6 pt-1.5">
                             <span className="block text-on-surface-muted">Gateway Latency (p50)</span>
@@ -701,7 +758,7 @@ export function ModelProviderKeysCard() {
                             </span>
                           </div>
                         </>
-                      )}
+                      ) : null}
                     </div>
 
                     {/* Pinned Models Provided */}
@@ -795,12 +852,7 @@ export function ModelProviderKeysCard() {
         </div>
 
         {/* Multi-Provider Failover & Governance Note */}
-        <div className="flex items-start gap-2.5 rounded-md border border-fluent-border bg-white/[0.01] p-3 text-[12px] text-on-surface-variant">
-          <Icon name="hub" size={16} className="mt-0.5 text-fluent-blue-light" />
-          <div className="leading-5">
-            <strong className="text-white">Multi-Provider Failover &amp; Key Isolation:</strong> Every specialist agent is configured with a primary model and cross-provider fallbacks (for example, <code className="font-mono text-[11px] text-white">anthropic/claude-sonnet</code> failing over to <code className="font-mono text-[11px] text-white">deepseek/deepseek-v3</code> and <code className="font-mono text-[11px] text-white">openai/gpt-4o</code>). Imported provider keys are used strictly by the Factory LLM gateway and are never injected into sandbox test containers.
-          </div>
-        </div>
+        {MULTI_PROVIDER_FAILOVER_NOTE}
       </div>
     </Card>
   );

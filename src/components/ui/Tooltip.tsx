@@ -10,15 +10,16 @@ export function Tooltip({ content, children, side = 'top', className = 'inline-f
   const id = useId();
   const anchor = useRef<HTMLSpanElement>(null);
   const [at, setAt] = useState<{ x: number; y: number } | null>(null);
+  const isOpen = at !== null;
 
   useEffect(() => {
-    if (!at) return;
+    if (!isOpen) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setAt(null);
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [at]);
+  }, [isOpen]);
 
   if (!content) return <>{children}</>;
 

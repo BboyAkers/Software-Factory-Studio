@@ -4,6 +4,7 @@ import { useCan } from '../../../app/session';
 import { useGo } from '../../../app/nav';
 import { useNow } from '../../../app/useNow';
 import { connectionStore, deriveConnection } from '../../../api/state';
+import { setSelectedProject } from '../../../app/SelectOrConnectRepo';
 import {
   Badge,
   Button,
@@ -36,6 +37,73 @@ interface ConnectGitHubFormValues {
   autoMergeVerifiedPRs: boolean;
   humanSignoffP0P1Schema: boolean;
 }
+
+const MODAL_TITLE = (
+  <span className="flex items-center gap-2.5">
+    <GitHubIcon size={20} className="text-white" />
+    <span>Connect GitHub Repository</span>
+  </span>
+);
+
+const AUTH_METHOD_SECTION = (
+  <div>
+    <label className="mb-1 block text-[13px] font-medium text-on-surface">Authentication Method</label>
+    <div className="grid grid-cols-2 gap-2">
+      <div className="flex items-center justify-between rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-[13px] font-medium text-white">
+        <span className="flex items-center gap-2">
+          <Icon name="key" size={16} className="text-fluent-blue-light" />
+          Personal Access Token (PAT)
+        </span>
+        <Badge tone="info">Active</Badge>
+      </div>
+
+      <Tooltip content="GitHub App & OAuth authentication is disabled in v1 (spec §1.2 / §13.1).">
+        <div className="flex cursor-not-allowed items-center justify-between rounded-md border border-fluent-border bg-white/5 px-3 py-2 text-[13px] text-on-surface-muted opacity-60">
+          <span className="flex items-center gap-2">
+            <Icon name="apps" size={16} />
+            GitHub App / OAuth
+          </span>
+          <span className="text-[11px] font-medium">Disabled in v1</span>
+        </div>
+      </Tooltip>
+    </div>
+  </div>
+);
+
+const REQUIRED_SCOPES_SECTION = (
+  <div>
+    <span className="block text-[12px] font-medium text-on-surface-variant mb-1.5">
+      Required token repository permissions (spec §13.1):
+    </span>
+    <div className="flex flex-wrap gap-1.5 text-[12px]">
+      <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
+        Contents: Read &amp; write
+      </span>
+      <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
+        Pull requests: Read &amp; write
+      </span>
+      <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
+        Checks: Read &amp; write
+      </span>
+      <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
+        Issues: Read &amp; write
+      </span>
+      <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
+        Deployments: Read
+      </span>
+      <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface-muted">
+        Webhooks: Read &amp; write (optional)
+      </span>
+    </div>
+  </div>
+);
+
+const PREFLIGHT_PENDING_BANNER = (
+  <div className="flex items-center gap-2 rounded-md border border-fluent-border bg-white/5 p-3 text-[13px] text-on-surface-variant">
+    <span className="spinner size-4 animate-[spin_700ms_linear_infinite] rounded-full border-2 border-primary border-t-transparent" />
+    <span>Running preflight checks on GitHub API...</span>
+  </div>
+);
 
 export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess }: ConnectGitHubModalProps) {
   const [showToken, setShowToken] = useState(false);
@@ -129,11 +197,7 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
           autoMergeVerifiedPRs: false,
           humanSignoffP0P1Schema: true,
         });
-        try {
-          globalThis.localStorage?.setItem('factory.selected_project', createdProject.id);
-        } catch {
-          // ignore
-        }
+        setSelectedProject(createdProject.id);
         if (onSuccess) {
           onSuccess(createdProject.id);
         } else {
@@ -169,12 +233,7 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
       onClose={onClose}
       size="lg"
       dismissible={!connect.isPending && !preflight.isPending}
-      title={
-        <span className="flex items-center gap-2.5">
-          <GitHubIcon size={20} className="text-white" />
-          <span>Connect GitHub Repository</span>
-        </span>
-      }
+      title={MODAL_TITLE}
       description="Connect a personal or organization repository to the autonomous software factory (spec §13.1)."
       footer={
         <div className="flex w-full items-center justify-between gap-3">
@@ -247,28 +306,7 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
           </Field>
 
           {/* Authentication Method Selector */}
-          <div>
-            <label className="mb-1 block text-[13px] font-medium text-on-surface">Authentication Method</label>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="flex items-center justify-between rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-[13px] font-medium text-white">
-                <span className="flex items-center gap-2">
-                  <Icon name="key" size={16} className="text-fluent-blue-light" />
-                  Personal Access Token (PAT)
-                </span>
-                <Badge tone="info">Active</Badge>
-              </div>
-
-              <Tooltip content="GitHub App & OAuth authentication is disabled in v1 (spec §1.2 / §13.1).">
-                <div className="flex cursor-not-allowed items-center justify-between rounded-md border border-fluent-border bg-white/5 px-3 py-2 text-[13px] text-on-surface-muted opacity-60">
-                  <span className="flex items-center gap-2">
-                    <Icon name="apps" size={16} />
-                    GitHub App / OAuth
-                  </span>
-                  <span className="text-[11px] font-medium">Disabled in v1</span>
-                </div>
-              </Tooltip>
-            </div>
-          </div>
+          {AUTH_METHOD_SECTION}
         </div>
 
         {/* Step 2: Fine-Grained Personal Access Token */}
@@ -307,7 +345,7 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
                 />
                 <button
                   type="button"
-                  onClick={() => setShowToken(!showToken)}
+                  onClick={() => setShowToken((prev) => !prev)}
                   aria-label={showToken ? 'Hide token' : 'Show token'}
                   className="focus-ring absolute top-1/2 right-2 -translate-y-1/2 rounded p-1 text-on-surface-variant hover:text-white"
                 >
@@ -318,31 +356,7 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
           </Field>
 
           {/* Required Scopes Reminder */}
-          <div>
-            <span className="block text-[12px] font-medium text-on-surface-variant mb-1.5">
-              Required token repository permissions (spec §13.1):
-            </span>
-            <div className="flex flex-wrap gap-1.5 text-[12px]">
-              <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
-                Contents: Read &amp; write
-              </span>
-              <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
-                Pull requests: Read &amp; write
-              </span>
-              <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
-                Checks: Read &amp; write
-              </span>
-              <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
-                Issues: Read &amp; write
-              </span>
-              <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
-                Deployments: Read
-              </span>
-              <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface-muted">
-                Webhooks: Read &amp; write (optional)
-              </span>
-            </div>
-          </div>
+          {REQUIRED_SCOPES_SECTION}
         </div>
 
         {/* Step 3: Branch & Project Budget */}
@@ -476,14 +490,9 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
             </Button>
           </div>
 
-          {preflight.isPending && (
-            <div className="flex items-center gap-2 rounded-md border border-fluent-border bg-white/5 p-3 text-[13px] text-on-surface-variant">
-              <span className="spinner size-4 animate-[spin_700ms_linear_infinite] rounded-full border-2 border-primary border-t-transparent" />
-              <span>Running preflight checks on GitHub API...</span>
-            </div>
-          )}
+          {preflight.isPending ? PREFLIGHT_PENDING_BANNER : null}
 
-          {preflightData && (
+          {preflightData ? (
             <div className="space-y-2">
               <div
                 className={`flex items-center gap-2 rounded-md border p-3 text-[13px] font-medium ${
@@ -525,19 +534,19 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-white">{c.label}</span>
-                            {c.required && (
+                            {c.required ? (
                               <span className="text-[11px] font-mono uppercase text-on-surface-muted">
                                 Required
                               </span>
-                            )}
+                            ) : null}
                           </div>
                           <p className="mt-0.5 text-[12px] text-on-surface-variant">{c.detail}</p>
-                          {c.fix && c.status !== 'pass' && (
+                          {c.fix && c.status !== 'pass' ? (
                             <div className="mt-1.5 rounded bg-fluent-error-subtle/50 border border-fluent-error/20 p-2 text-[12px] text-fluent-danger-text">
                               <span className="font-semibold">Recommended Fix: </span>
                               {c.fix}
                             </div>
-                          )}
+                          ) : null}
                         </div>
                       </div>
                       <Badge
@@ -556,7 +565,7 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
                 ))}
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </form>
     </Dialog>

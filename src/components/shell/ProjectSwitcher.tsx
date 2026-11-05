@@ -1,5 +1,6 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useCurrentPage, useGo } from '../../app/nav';
+import { clearSelectedProject, setSelectedProject } from '../../app/SelectOrConnectRepo';
 import { useCan, useSession } from '../../app/session';
 import { Icon, Menu, Skeleton, type MenuItem } from '../ui';
 
@@ -25,11 +26,7 @@ export function ProjectSwitcher() {
         icon: 'folder',
         current: p.id === projectId,
         onSelect: () => {
-          try {
-            globalThis.localStorage?.setItem('factory.selected_project', p.id);
-          } catch {
-            // ignore
-          }
+          setSelectedProject(p.id);
           void go(page?.segment ?? 'overview', { project: p.id });
         },
       }),
@@ -40,11 +37,7 @@ export function ProjectSwitcher() {
       icon: 'sync_alt',
       separatorBefore: true,
       onSelect: () => {
-        try {
-          globalThis.localStorage?.removeItem('factory.selected_project');
-        } catch {
-          // ignore
-        }
+        clearSelectedProject();
         void navigate({ to: '/', search: { switch: true } });
       },
     },
