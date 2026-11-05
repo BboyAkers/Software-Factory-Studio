@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { useCan } from '../../../app/session';
 import { useGo } from '../../../app/nav';
 import { useNow } from '../../../app/useNow';
@@ -26,18 +27,51 @@ interface ConnectGitHubModalProps {
   onSuccess?: (projectId: string) => void;
 }
 
-export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess }: ConnectGitHubModalProps) {
-  const [repoInput, setRepoInput] = useState(initialRepo || ((import.meta.env.VITE_DEFAULT_REPO as string | undefined) ?? ''));
-  const [token, setToken] = useState('');
-  const [showToken, setShowToken] = useState(false);
-  const [defaultBranch, setDefaultBranch] = useState('main');
-  const [monthlyCapUsd, setMonthlyCapUsd] = useState(1500);
-  const [softLimitPercent, setSoftLimitPercent] = useState(80);
-  const [autoMergeVerifiedPRs, setAutoMergeVerifiedPRs] = useState(false);
-  const [humanSignoffP0P1Schema, setHumanSignoffP0P1Schema] = useState(true);
+interface ConnectGitHubFormValues {
+  repoInput: string;
+  token: string;
+  defaultBranch: string;
+  monthlyCapUsd: number;
+  softLimitPercent: number;
+  autoMergeVerifiedPRs: boolean;
+  humanSignoffP0P1Schema: boolean;
+}
 
-  // Field error states
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess }: ConnectGitHubModalProps) {
+  const [showToken, setShowToken] = useState(false);
+
+  const defaultRepo = initialRepo || ((import.meta.env.VITE_DEFAULT_REPO as string | undefined) ?? '');
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    trigger,
+    getValues,
+    reset,
+    formState: { errors },
+  } = useForm<ConnectGitHubFormValues>({
+    defaultValues: {
+      repoInput: defaultRepo,
+      token: '',
+      defaultBranch: 'main',
+      monthlyCapUsd: 1500,
+      softLimitPercent: 80,
+      autoMergeVerifiedPRs: false,
+      humanSignoffP0P1Schema: true,
+    },
+    mode: 'onSubmit',
+  });
+
+  useEffect(() => {
+    if (initialRepo) {
+      reset((current) => ({
+        ...current,
+        repoInput: current.repoInput || initialRepo,
+      }));
+    }
+  }, [initialRepo, reset]);
 
   const now = useNow();
   const isOffline = deriveConnection(connectionStore.get(), now) === 'offline';
@@ -47,63 +81,54 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
   const preflight = usePreflightMutation();
   const connect = useConnectProjectMutation();
 
+  const repoInput = watch('repoInput');
   const normalizedRepo = normalizeRepo(repoInput);
 
   const handleRunPreflight = async () => {
-    const errors: Record<string, string> = {};
-    if (!normalizedRepo || !normalizedRepo.includes('/')) {
-      errors.repo = 'Enter a valid repository as owner/repo or paste its GitHub URL.';
-    }
-    if (!token.trim()) {
-      errors.token = 'A Personal Access Token is required for repository synchronization.';
-    }
-    setFieldErrors(errors);
-    if (Object.keys(errors).length > 0) return;
+    const valid = await trigger(['repoInput', 'token']);
+    if (!valid) return;
+
+    const values = getValues();
+    const targetRepo = normalizeRepo(values.repoInput);
 
     try {
       await preflight.mutateAsync({
-        repo: normalizedRepo,
-        token: token.trim(),
-        defaultBranch: defaultBranch.trim() || 'main',
+        repo: targetRepo,
+        token: values.token.trim(),
+        defaultBranch: values.defaultBranch.trim() || 'main',
       });
     } catch {
       // Inline results will show
     }
   };
 
-  const handleConnect = async (event: FormEvent) => {
-    event.preventDefault();
+  const onSubmit = async (values: ConnectGitHubFormValues) => {
     if (!connectCapability.allowed || isOffline) return;
 
-    const errors: Record<string, string> = {};
-    if (!normalizedRepo || !normalizedRepo.includes('/')) {
-      errors.repo = 'Enter a valid repository as owner/repo.';
-    }
-    if (!token.trim()) {
-      errors.token = 'Token is required.';
-    }
-    if (monthlyCapUsd <= 0 || Number.isNaN(monthlyCapUsd)) {
-      errors.budget = 'Monthly budget cap must be a positive number.';
-    }
-    setFieldErrors(errors);
-    if (Object.keys(errors).length > 0) return;
+    const targetRepo = normalizeRepo(values.repoInput);
 
     try {
       const createdProject = await connect.mutateAsync({
-        repo: normalizedRepo,
-        token: token.trim(),
-        defaultBranch: defaultBranch.trim() || 'main',
-        monthlyCapUsd,
-        softLimitPercent,
-        autoMergeVerifiedPRs,
-        humanSignoffP0P1Schema,
+        repo: targetRepo,
+        token: values.token.trim(),
+        defaultBranch: values.defaultBranch.trim() || 'main',
+        monthlyCapUsd: values.monthlyCapUsd,
+        softLimitPercent: values.softLimitPercent,
+        autoMergeVerifiedPRs: values.autoMergeVerifiedPRs,
+        humanSignoffP0P1Schema: values.humanSignoffP0P1Schema,
       });
 
       if ('id' in createdProject) {
         onClose();
-        // Reset form
-        setToken('');
-        setRepoInput('');
+        reset({
+          repoInput: '',
+          token: '',
+          defaultBranch: 'main',
+          monthlyCapUsd: 1500,
+          softLimitPercent: 80,
+          autoMergeVerifiedPRs: false,
+          humanSignoffP0P1Schema: true,
+        });
         try {
           globalThis.localStorage?.setItem('factory.selected_project', createdProject.id);
         } catch {
@@ -165,7 +190,7 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
             <Button
               variant="secondary"
               icon="rule"
-              onClick={handleRunPreflight}
+              onClick={() => void handleRunPreflight()}
               loading={preflight.isPending}
               disabled={connect.isPending}
             >
@@ -175,7 +200,7 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
             <Button
               variant="primary"
               icon="link"
-              onClick={(e) => void handleConnect(e)}
+              onClick={() => void handleSubmit(onSubmit)()}
               loading={connect.isPending}
               disabled={!canConnect}
               disabledReason={connectDisabledReason}
@@ -186,7 +211,7 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
         </div>
       }
     >
-      <form onSubmit={(e) => void handleConnect(e)} className="space-y-5">
+      <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} className="space-y-5" noValidate>
         {/* Step 1: Repository & Target */}
         <div className="space-y-3 rounded-lg border border-fluent-border bg-white/[0.02] p-4">
           <div className="flex items-center justify-between">
@@ -202,17 +227,21 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
                 ? `Will connect: ${normalizedRepo}`
                 : 'Enter as owner/repo (e.g. BboyAkers/Software-Factory-Studio) or paste URL'
             }
-            error={fieldErrors.repo}
+            error={errors.repoInput?.message}
           >
             {(props) => (
               <Input
                 {...props}
                 placeholder="e.g. BboyAkers/Software-Factory-Studio"
-                value={repoInput}
-                onChange={(e) => {
-                  setRepoInput(e.target.value);
-                  setFieldErrors((prev) => ({ ...prev, repo: '' }));
-                }}
+                {...register('repoInput', {
+                  validate: (value) => {
+                    const normalized = normalizeRepo(value);
+                    return (
+                      (Boolean(normalized) && normalized.includes('/')) ||
+                      'Enter a valid repository as owner/repo or paste its GitHub URL.'
+                    );
+                  },
+                })}
               />
             )}
           </Field>
@@ -261,7 +290,7 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
             label="Personal Access Token"
             required
             hint="Fine-grained token scoped strictly to this repository (starts with github_pat_)."
-            error={fieldErrors.token}
+            error={errors.token?.message}
           >
             {(props) => (
               <div className="relative">
@@ -269,12 +298,12 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
                   {...props}
                   type={showToken ? 'text' : 'password'}
                   placeholder="github_pat_..."
-                  value={token}
-                  onChange={(e) => {
-                    setToken(e.target.value);
-                    setFieldErrors((prev) => ({ ...prev, token: '' }));
-                  }}
                   className="pr-10 font-mono text-[13px]"
+                  {...register('token', {
+                    validate: (value) =>
+                      value.trim().length > 0 ||
+                      'A Personal Access Token is required for repository synchronization.',
+                  })}
                 />
                 <button
                   type="button"
@@ -295,22 +324,22 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
             </span>
             <div className="flex flex-wrap gap-1.5 text-[12px]">
               <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
-                Contents: Read & write
+                Contents: Read &amp; write
               </span>
               <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
-                Pull requests: Read & write
+                Pull requests: Read &amp; write
               </span>
               <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
-                Checks: Read & write
+                Checks: Read &amp; write
               </span>
               <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
-                Issues: Read & write
+                Issues: Read &amp; write
               </span>
               <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface">
                 Deployments: Read
               </span>
               <span className="rounded bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-on-surface-muted">
-                Webhooks: Read & write (optional)
+                Webhooks: Read &amp; write (optional)
               </span>
             </div>
           </div>
@@ -318,16 +347,20 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
 
         {/* Step 3: Branch & Project Budget */}
         <div className="space-y-3 rounded-lg border border-fluent-border bg-white/[0.02] p-4">
-          <h3 className="text-[14px] font-semibold text-white">3. Branch & Project Budget</h3>
+          <h3 className="text-[14px] font-semibold text-white">3. Branch &amp; Project Budget</h3>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="Default Target Branch" required hint="Trunk branch to target (e.g. main, master)">
+            <Field
+              label="Default Target Branch"
+              required
+              hint="Trunk branch to target (e.g. main, master)"
+              error={errors.defaultBranch?.message}
+            >
               {(props) => (
                 <Input
                   {...props}
                   placeholder="main"
-                  value={defaultBranch}
-                  onChange={(e) => setDefaultBranch(e.target.value)}
+                  {...register('defaultBranch')}
                 />
               )}
             </Field>
@@ -345,23 +378,33 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="Monthly Budget Cap (USD)" required hint="Hard limit per calendar month" error={fieldErrors.budget}>
+            <Field
+              label="Monthly Budget Cap (USD)"
+              required
+              hint="Hard limit per calendar month"
+              error={errors.monthlyCapUsd?.message}
+            >
               {(props) => (
                 <Input
                   {...props}
                   type="number"
                   min="1"
                   step="50"
-                  value={monthlyCapUsd}
-                  onChange={(e) => {
-                    setMonthlyCapUsd(Number(e.target.value));
-                    setFieldErrors((prev) => ({ ...prev, budget: '' }));
-                  }}
+                  {...register('monthlyCapUsd', {
+                    valueAsNumber: true,
+                    validate: (value) =>
+                      (!Number.isNaN(value) && value > 0) ||
+                      'Monthly budget cap must be a positive number.',
+                  })}
                 />
               )}
             </Field>
 
-            <Field label="Soft Limit Alert (%)" hint="Slack alert triggers when spend crosses threshold">
+            <Field
+              label="Soft Limit Alert (%)"
+              hint="Slack alert triggers when spend crosses threshold"
+              error={errors.softLimitPercent?.message}
+            >
               {(props) => (
                 <Input
                   {...props}
@@ -369,8 +412,11 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
                   min="50"
                   max="95"
                   step="5"
-                  value={softLimitPercent}
-                  onChange={(e) => setSoftLimitPercent(Number(e.target.value))}
+                  {...register('softLimitPercent', {
+                    valueAsNumber: true,
+                    min: { value: 50, message: 'Soft limit must be at least 50%.' },
+                    max: { value: 95, message: 'Soft limit cannot exceed 95%.' },
+                  })}
                 />
               )}
             </Field>
@@ -381,19 +427,31 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
         <div className="space-y-3 rounded-lg border border-fluent-border bg-white/[0.02] p-4">
           <h3 className="text-[14px] font-semibold text-white">4. Autonomous Governance Policies</h3>
 
-          <Toggle
-            label="Mainline Auto-Merge"
-            description="Automatically merge verified pull requests when 100% of Quality Sandbox deterministic gates pass (default: off)."
-            checked={autoMergeVerifiedPRs}
-            onChange={setAutoMergeVerifiedPRs}
+          <Controller
+            name="autoMergeVerifiedPRs"
+            control={control}
+            render={({ field }) => (
+              <Toggle
+                label="Mainline Auto-Merge"
+                description="Automatically merge verified pull requests when 100% of Quality Sandbox deterministic gates pass (default: off)."
+                checked={field.value}
+                onChange={field.onChange}
+              />
+            )}
           />
 
           <div className="border-t border-fluent-border/60 pt-3">
-            <Toggle
-              label="Human Sign-Off for P0/P1 & Schemas"
-              description="Require explicit maintainer approval before promoting P0 blocker workpacks or database schema changes."
-              checked={humanSignoffP0P1Schema}
-              onChange={setHumanSignoffP0P1Schema}
+            <Controller
+              name="humanSignoffP0P1Schema"
+              control={control}
+              render={({ field }) => (
+                <Toggle
+                  label="Human Sign-Off for P0/P1 & Schemas"
+                  description="Require explicit maintainer approval before promoting P0 blocker workpacks or database schema changes."
+                  checked={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
           </div>
         </div>
@@ -411,7 +469,7 @@ export function ConnectGitHubModal({ open, onClose, initialRepo = '', onSuccess 
               variant="secondary"
               size="sm"
               icon="sync"
-              onClick={handleRunPreflight}
+              onClick={() => void handleRunPreflight()}
               loading={preflight.isPending}
             >
               Verify

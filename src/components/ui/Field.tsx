@@ -1,4 +1,4 @@
-import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { useId, type ComponentProps, type ReactNode } from 'react';
 import { cx } from './cx';
 import { Icon } from './Icon';
 
@@ -45,15 +45,15 @@ const CONTROL =
   'w-full rounded-md border bg-white/5 text-[13px] text-on-surface placeholder:text-on-surface-muted transition-colors duration-150 focus-ring ' +
   'border-fluent-border border-b-white/40 hover:bg-white/8 focus:bg-white/8 focus:border-b-primary disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-fluent-error aria-[invalid=true]:border-b-fluent-error';
 
-export function Input({ className, ...rest }: InputHTMLAttributes<HTMLInputElement>) {
+export function Input({ className, ...rest }: ComponentProps<'input'>) {
   return <input {...rest} className={cx(CONTROL, 'h-8 px-2.5', className)} />;
 }
 
-export function Textarea({ className, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function Textarea({ className, ...rest }: ComponentProps<'textarea'>) {
   return <textarea {...rest} className={cx(CONTROL, 'min-h-20 resize-y px-2.5 py-1.5 leading-5', className)} />;
 }
 
-export function Select({ className, children, ...rest }: SelectHTMLAttributes<HTMLSelectElement>) {
+export function Select({ className, children, ...rest }: ComponentProps<'select'>) {
   return (
     <span className="relative block w-full">
       <select {...rest} className={cx(CONTROL, 'h-8 cursor-pointer appearance-none pr-8 pl-2.5', className)}>

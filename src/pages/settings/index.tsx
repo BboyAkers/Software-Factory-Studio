@@ -5,6 +5,7 @@ import { useSession } from '../../app/session';
 import { useSearchState } from '../../app/nav';
 import { SearchSchema } from './routes';
 import { GitHubConnectionCard } from './components/GitHubConnectionCard';
+import { ModelProviderKeysCard } from './components/ModelProviderKeysCard';
 
 export default function SettingsPage() {
   usePageTitle('Settings');
@@ -40,6 +41,9 @@ export default function SettingsPage() {
           onOpenConnectModal={handleOpenConnectModal}
           onCloseConnectModal={handleCloseConnectModal}
         />
+
+        {/* Model Provider Gateways & API Keys Card */}
+        <ModelProviderKeysCard />
       </div>
     </Page>
   );

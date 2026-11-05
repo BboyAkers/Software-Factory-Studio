@@ -12,6 +12,7 @@ The Settings & Governance feature configures external infrastructure connectors,
 ## Module Structure
 - `components/`:
   - `GitHubConnectionCard.tsx`: Primary card for GitHub repository status, branch sync, permission audits, integration pause/resume, and connection wizard trigger.
+  - `ModelProviderKeysCard.tsx`: Card for importing/rotating write-only LLM provider API keys (Anthropic, OpenAI, DeepSeek), running 1-token connectivity probes, toggling provider gateways, and inspecting which specialist agents route through each provider.
   - `ConnectGitHubModal.tsx`: Complete repository onboarding modal implementing §13.1 steps (target repo, fine-grained PAT, branch & budget, governance toggles, and live preflight diagnostics).
   - `PauseGitHubConfirmDialog.tsx`: Confirmation dialog for pausing GitHub integration with clear explanation of active workpack impact.
   - `GitHubIcon.tsx`: Official SVG mark for GitHub.
@@ -20,6 +21,7 @@ The Settings & Governance feature configures external infrastructure connectors,
 - `mutations/`:
   - `useConnectProjectMutation.ts`: Dispatches `POST /projects/connect` to provision a connected repository.
   - `usePreflightMutation.ts`: Dispatches `POST /projects/connect/preflight` for dry-run verification.
+  - `useRotateProviderKeyMutation.ts`: Dispatches `PUT /integrations/:id/key` to import or rotate a write-only model provider API key.
   - `useToggleIntegrationMutation.ts`: Dispatches `PATCH /integrations/:id` to toggle or pause connectors.
   - `useTestIntegrationMutation.ts`: Dispatches `POST /integrations/:id/test` for latency checks.
 - `routes.ts`: Search schema supporting `?section=connect` deep-linking.
