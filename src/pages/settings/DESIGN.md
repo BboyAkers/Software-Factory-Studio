@@ -11,8 +11,15 @@ The Settings & Governance feature configures external infrastructure connectors,
 
 ## Module Structure
 - `components/`:
-  - `GitHubConnectionCard.tsx`: Primary card for GitHub repository status, branch sync, permission audits, integration pause/resume, and connection wizard trigger.
-  - `ModelProviderKeysCard.tsx`: Card for importing/rotating write-only LLM provider API keys (Anthropic, OpenAI, DeepSeek), running 1-token connectivity probes, toggling provider gateways, and inspecting which specialist agents route through each provider.
+  - `GitHubConnectionCard.tsx`: Primary container card coordinating GitHub repository queries, mutations, and dialogs while delegating view sections to `components/github/`.
+  - `github/`:
+    - `GitHubCardHeader.tsx`: Card header with status badge, sync toggle, and connect/disconnect actions.
+    - `ConnectedRepoOverview.tsx`: Connected repository overview box, test connection trigger, and metadata pills.
+    - `TokenPermissionsGrid.tsx`: Fine-grained PAT permission scope checklist with O(1) lookup map.
+    - `GitHubWebhookSection.tsx`: Colocated webhook URL copy/ping verification section and active event subscriptions.
+    - `GitHubFooterSections.tsx`: Mainline branch protection note and repository disconnect danger zone.
+    - `GitHubEmptyState.tsx`: Disconnected empty state call-to-action.
+  - `ModelProviderKeysCard.tsx`: Compact `// MODEL ACCESS` card for selecting an LLM provider (Anthropic, OpenAI, DeepSeek) and saving a write-only API key to the project vault.
   - `ConnectGitHubModal.tsx`: Complete repository onboarding modal implementing §13.1 steps (target repo, fine-grained PAT, branch & budget, governance toggles, and live preflight diagnostics).
   - `PauseGitHubConfirmDialog.tsx`: Confirmation dialog for pausing GitHub integration with clear explanation of active workpack impact.
   - `GitHubIcon.tsx`: Official SVG mark for GitHub.
