@@ -15,9 +15,8 @@ The Settings & Governance feature configures external infrastructure connectors,
   - `github/`:
     - `GitHubCardHeader.tsx`: Card header with status badge, sync toggle, and connect/disconnect actions.
     - `ConnectedRepoOverview.tsx`: Connected repository overview box, test connection trigger, and metadata pills.
-    - `TokenPermissionsGrid.tsx`: Fine-grained PAT permission scope checklist with O(1) lookup map.
     - `GitHubWebhookSection.tsx`: Colocated webhook URL copy/ping verification section and active event subscriptions.
-    - `GitHubFooterSections.tsx`: Mainline branch protection note and repository disconnect danger zone.
+    - `GitHubFooterSections.tsx`: Mainline branch protection note.
     - `GitHubEmptyState.tsx`: Disconnected empty state call-to-action.
   - `ModelProviderKeysCard.tsx`: Compact `// MODEL ACCESS` card for selecting an LLM provider (Anthropic, OpenAI, DeepSeek) and saving a write-only API key to the project vault.
   - `ConnectGitHubModal.tsx`: Complete repository onboarding modal implementing §13.1 steps (target repo, fine-grained PAT, branch & budget, governance toggles, and live preflight diagnostics).

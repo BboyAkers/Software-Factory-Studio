@@ -68,7 +68,7 @@ export function GitHubCardHeader({
             )}
           </div>
           <p className="mt-0.5 text-[12px] text-on-surface-variant">
-            Synchronize repository trunk, automated pull requests, issue intake, and fine-grained access tokens.
+            Synchronize repository trunk, automated pull requests, and issue intake.
           </p>
         </div>
       </div>

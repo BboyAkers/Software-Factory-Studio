@@ -11,7 +11,6 @@ import { PauseGitHubConfirmDialog } from './PauseGitHubConfirmDialog';
 import { DisconnectRepoConfirmDialog } from './DisconnectRepoConfirmDialog';
 import { GitHubCardHeader } from './github/GitHubCardHeader';
 import { ConnectedRepoOverview } from './github/ConnectedRepoOverview';
-import { TokenPermissionsGrid } from './github/TokenPermissionsGrid';
 import { GitHubWebhookSection } from './github/GitHubWebhookSection';
 import { GitHubFooterSections } from './github/GitHubFooterSections';
 import { GitHubEmptyState } from './github/GitHubEmptyState';
@@ -170,8 +169,6 @@ export function GitHubConnectionCard({
                 onTestConnection={handleTestConnection}
               />
 
-              <TokenPermissionsGrid permissions={repository.permissions} />
-
               <GitHubWebhookSection
                 repoFullName={repository.fullName}
                 webhookActive={repository.webhookActive}
@@ -179,15 +176,7 @@ export function GitHubConnectionCard({
                 onWebhookVerified={handleWebhookVerified}
               />
 
-              <GitHubFooterSections
-                defaultBranch={repository.defaultBranch}
-                repoFullName={repository.fullName}
-                isOffline={isOffline}
-                canConnectAllowed={canConnect.allowed}
-                canConnectReason={canConnect.reason}
-                isDisconnectPending={disconnectMutation.isPending}
-                onOpenDisconnectConfirm={() => setDisconnectConfirmOpen(true)}
-              />
+              <GitHubFooterSections defaultBranch={repository.defaultBranch} />
             </div>
           ) : (
             <GitHubEmptyState
