@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter, type ErrorComponentProps } from '@tanstack/react-router';
-import { useMe } from '../api/queries';
+import { useMe, useProjectId } from '../api/queries';
 import { EmptyState, ErrorState, Icon, Skeleton, buttonClass } from '../components/ui';
 import { useExtensions } from './extensions';
 import { AppLink } from './nav';
@@ -84,6 +84,7 @@ export function NotFoundPage({ data }: { data?: unknown }) {
 
 /** An unknown page inside a project: the shell stays, so the person can navigate away. */
 export function PageNotFound() {
+  const current = useProjectId();
   return (
     <div className="grid h-full place-items-center p-6">
       <EmptyState
@@ -91,9 +92,16 @@ export function PageNotFound() {
         title="This page does not exist"
         description="Use the navigation to go somewhere else, or return to the overview."
         action={
-          <AppLink to="overview" className={buttonClass('secondary')}>
-            Go to Overview
-          </AppLink>
+          <div className="flex items-center gap-2">
+            {current ? (
+              <AppLink to="overview" className={buttonClass('secondary')}>
+                Go to Overview
+              </AppLink>
+            ) : null}
+            <a href="/?switch=true" className={buttonClass(current ? 'ghost' : 'secondary')}>
+              {current ? 'Switch Project' : 'Select or Connect Repository'}
+            </a>
+          </div>
         }
       />
     </div>

@@ -15,7 +15,7 @@ import * as settings from '../pages/settings/routes';
 import * as spec from '../pages/spec-studio/routes';
 import * as matrix from '../pages/task-matrix/routes';
 import { useExtensions } from './extensions';
-import { NotFoundPage, PageNotFound, RouteError, RoutePending, SignedOut } from './Fallbacks';
+import { NotFoundPage, RouteError, RoutePending, SignedOut } from './Fallbacks';
 import { selectOfflineProject } from './offline';
 import { parseSearch, stringifySearch } from './search';
 import { SelectOrConnectRepo, getSelectedProject, setSelectedProject } from './SelectOrConnectRepo';
@@ -53,7 +53,14 @@ const indexRoute = createRoute({
     if (search.switch) return;
     const saved = getSelectedProject();
     if (saved) {
-      const me = await context.queryClient.ensureQueryData(q.me());
+      let me = await context.queryClient.ensureQueryData(q.me());
+      if (!me.projects.some((p) => p.id === saved)) {
+        try {
+          me = await context.queryClient.fetchQuery({ ...q.me(), staleTime: 0 });
+        } catch {
+          // Fall back to cached session data if offline or unreachable
+        }
+      }
       if (me.projects.some((p) => p.id === saved)) {
         throw redirect({ to: '/p/$project/overview', params: { project: saved }, replace: true });
       }
@@ -67,14 +74,23 @@ const projectRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'p/$project',
   beforeLoad: async ({ params, context }) => {
-    const me = await context.queryClient.ensureQueryData(q.me());
-    if (!me.projects.some((project) => project.id === params.project)) throw notFound({ data: { project: params.project } });
+    let me = await context.queryClient.ensureQueryData(q.me());
+    if (!me.projects.some((project) => project.id === params.project)) {
+      try {
+        me = await context.queryClient.fetchQuery({ ...q.me(), staleTime: 0 });
+      } catch {
+        // Fall back to cached session data if offline or unreachable
+      }
+    }
+    if (!me.projects.some((project) => project.id === params.project)) {
+      throw notFound({ data: { project: params.project } });
+    }
     setSelectedProject(params.project);
     setCurrentProject(params.project);
     selectOfflineProject(params.project);
   },
   component: AppShell,
-  notFoundComponent: PageNotFound,
+  notFoundComponent: NotFoundPage,
 });
 
 const projectIndexRoute = createRoute({
