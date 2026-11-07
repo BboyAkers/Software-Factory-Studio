@@ -1,13 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Button, Drawer, Icon } from '../../../components/ui';
-import type { Agent, AgentConfig, ModelId, ReasoningEffort } from '../../../contracts';
-import { FLEET_MODELS } from './AgentCard';
+import type { Agent, AgentConfig, ReasoningEffort } from '../../../contracts';
+import {
+  PROVIDER_META,
+  PROVIDER_MODELS,
+  defaultModelForAgent,
+  findProviderModelOption,
+  type ModelProviderId,
+  type ProviderModelOption,
+} from '../../../domain/providerModels';
 
 interface AgentTuningDrawerProps {
   agent: Agent | null;
   open: boolean;
+  activeProvider?: ModelProviderId;
+  availableModels?: readonly ProviderModelOption[];
+  selectedModelOptionId?: string;
   onClose: () => void;
-  onSaveConfig: (agentId: string, updatedConfig: AgentConfig, note?: string) => Promise<void>;
+  onSaveConfig: (
+    agentId: string,
+    updatedConfig: AgentConfig,
+    note?: string,
+    selectedModelOptionId?: string,
+  ) => Promise<void>;
   isSaving: boolean;
   canTuneAllowed: boolean;
   isOffline: boolean;
@@ -18,6 +33,9 @@ const REASONING_EFFORTS: readonly ReasoningEffort[] = ['Low', 'Medium', 'High', 
 export function AgentTuningDrawer({
   agent,
   open,
+  activeProvider = 'anthropic',
+  availableModels = PROVIDER_MODELS[activeProvider],
+  selectedModelOptionId,
   onClose,
   onSaveConfig,
   isSaving,
@@ -25,7 +43,7 @@ export function AgentTuningDrawer({
   isOffline,
 }: AgentTuningDrawerProps) {
   const [promptText, setPromptText] = useState('');
-  const [primaryModel, setPrimaryModel] = useState<ModelId>('anthropic/claude-sonnet');
+  const [primaryModelId, setPrimaryModelId] = useState<string>('anthropic/claude-sonnet');
   const [reasoningEffort, setReasoningEffort] = useState<ReasoningEffort>('High');
   const [temperature, setTemperature] = useState(0.2);
   const [saveNote, setSaveNote] = useState('');
@@ -33,28 +51,43 @@ export function AgentTuningDrawer({
   useEffect(() => {
     if (agent) {
       setPromptText(agent.config.systemPrompt);
-      setPrimaryModel(agent.config.model.primary);
+      const initialModel =
+        selectedModelOptionId ??
+        defaultModelForAgent(agent.id, activeProvider).id;
+      setPrimaryModelId(initialModel);
       setReasoningEffort(agent.config.model.reasoningEffort);
       setTemperature(agent.config.model.temperature);
       setSaveNote('');
     }
-  }, [agent]);
+  }, [agent, activeProvider, selectedModelOptionId]);
 
   if (!agent) return null;
 
+  const providerMeta = PROVIDER_META[activeProvider];
+
   const handleSave = async () => {
+    const modelOption = findProviderModelOption(activeProvider, primaryModelId, agent.id);
+    const fallbacks = agent.config.model.fallbacks.filter(
+      (f) => f !== modelOption.catalogModelId,
+    );
+
     const updatedConfig: AgentConfig = {
       ...agent.config,
       systemPrompt: promptText.trim(),
       model: {
         ...agent.config.model,
-        primary: primaryModel,
+        primary: modelOption.catalogModelId,
+        fallbacks,
         reasoningEffort,
         temperature,
       },
     };
 
-    await onSaveConfig(agent.id, updatedConfig, saveNote.trim() || undefined);
+    const noteText =
+      saveNote.trim() ||
+      `Updated ${agent.name} to ${modelOption.displayName} (${modelOption.pinnedModel})`;
+
+    await onSaveConfig(agent.id, updatedConfig, noteText, modelOption.id);
     onClose();
   };
 
@@ -77,7 +110,7 @@ export function AgentTuningDrawer({
       }
       description={
         <span>
-          {agent.role} · Active Version <code className="font-mono text-white">v{agent.activeVersion}</code>
+          {agent.role} · Active Version <code className="font-mono text-white">v{agent.activeVersion}</code> · Provider <code className="font-mono text-fluent-success">{providerMeta.name}</code>
         </span>
       }
       footer={
@@ -126,17 +159,17 @@ export function AgentTuningDrawer({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 rounded-lg border border-fluent-border bg-white/[0.02] p-4">
           <div>
             <label className="block text-[12px] font-medium text-white mb-1.5">
-              Primary Model
+              {providerMeta.name} Model
             </label>
             <select
-              value={primaryModel}
-              onChange={(e) => setPrimaryModel(e.target.value as ModelId)}
+              value={primaryModelId}
+              onChange={(e) => setPrimaryModelId(e.target.value)}
               disabled={!canTuneAllowed || isOffline}
               className="focus-ring w-full rounded-md border border-fluent-border bg-black/40 px-2.5 py-1.5 font-mono text-[12px] text-white"
             >
-              {FLEET_MODELS.map((m) => (
+              {availableModels.map((m) => (
                 <option key={m.id} value={m.id}>
-                  {m.shortLabel} ({m.pinnedModel})
+                  {m.displayName} ({m.pinnedModel})
                 </option>
               ))}
             </select>

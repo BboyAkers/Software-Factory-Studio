@@ -1,12 +1,24 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { usePageTitle } from '../../app/usePageTitle';
+import { AppLink } from '../../app/nav';
+import { toast } from '../../app/toast';
 import { Page, PageHeader } from '../../components/layout/Page';
 import { Badge, Button, Card, ErrorState, Skeleton, StatusDot } from '../../components/ui';
-import { useAgents } from '../../api/queries';
+import { useAgents, useIntegrations, useProjectId } from '../../api/queries';
 import { useCan } from '../../app/session';
 import { useNow } from '../../app/useNow';
 import { connectionStore, deriveConnection } from '../../api/state';
-import type { Agent, AgentConfig, ModelId } from '../../contracts';
+import type { Agent, AgentConfig } from '../../contracts';
+import {
+  PROVIDER_META,
+  commitSavedModelsForProject,
+  defaultModelForAgent,
+  findProviderModelOption,
+  getModelsForProvider,
+  resolveActiveProvider,
+  selectAgentModelForProject,
+  useProviderGateway,
+} from '../../domain/providerModels';
 import { AgentHierarchyTree } from './components/AgentHierarchyTree';
 import { AgentTuningDrawer } from './components/AgentTuningDrawer';
 import { useRunAgentMutation } from './mutations/useRunAgentMutation';
@@ -46,7 +58,11 @@ const LOADING_FLEET_SKELETON = (
 export default function FleetTuningPage() {
   usePageTitle('Fleet & Tuning');
 
+  const projectId = useProjectId();
   const { data: agents, isLoading, error, refetch } = useAgents();
+  const { data: integrations } = useIntegrations();
+  const gatewayState = useProviderGateway();
+
   const canTune = useCan('agent.tune');
   const canRun = useCan('agent.run');
 
@@ -56,21 +72,68 @@ export default function FleetTuningPage() {
   const runMutation = useRunAgentMutation();
   const saveMutation = useSaveAgentConfigMutation();
 
-  const [modelPreferences, setModelPreferences] = useState<Record<string, string>>({});
   const [runningAgentId, setRunningAgentId] = useState<string | null>(null);
   const [tuningAgent, setTuningAgent] = useState<Agent | null>(null);
   const [isSavingPreferences, setIsSavingPreferences] = useState(false);
 
-  // Initialize model preferences from loaded agents
-  useEffect(() => {
-    if (agents && Object.keys(modelPreferences).length === 0) {
-      const initial: Record<string, string> = {};
-      for (const a of agents) {
-        initial[a.id] = a.config.model.primary;
+  // Dynamically resolve active provider from Settings key rotation or project integrations
+  const activeProvider = useMemo(
+    () => resolveActiveProvider(projectId, integrations, agents, gatewayState),
+    [projectId, integrations, agents, gatewayState],
+  );
+
+  const availableModels = useMemo(
+    () => getModelsForProvider(activeProvider),
+    [activeProvider],
+  );
+
+  const providerMeta = PROVIDER_META[activeProvider];
+
+  // Current selected model option ID per agent for the active provider
+  const modelPreferences = useMemo(() => {
+    const map: Record<string, string> = {};
+    if (!agents) return map;
+    const storedMap = gatewayState.selectedModelByProject[projectId] ?? {};
+    for (const a of agents) {
+      const candidate = storedMap[a.id];
+      const validInProvider =
+        candidate && availableModels.some((m) => m.id === candidate);
+      if (validInProvider) {
+        map[a.id] = candidate;
+      } else if (
+        activeProvider === 'anthropic' &&
+        availableModels.some((m) => m.id === a.config.model.primary)
+      ) {
+        map[a.id] = a.config.model.primary;
+      } else {
+        map[a.id] = defaultModelForAgent(a.id, activeProvider).id;
       }
-      setModelPreferences(initial);
     }
-  }, [agents, modelPreferences]);
+    return map;
+  }, [agents, gatewayState.selectedModelByProject, projectId, availableModels, activeProvider]);
+
+  // Saved baseline model option ID per agent for the active provider
+  const savedPreferences = useMemo(() => {
+    const map: Record<string, string> = {};
+    if (!agents) return map;
+    const storedSaved = gatewayState.savedModelByProject[projectId] ?? {};
+    for (const a of agents) {
+      const candidate = storedSaved[a.id];
+      const validInProvider =
+        candidate && availableModels.some((m) => m.id === candidate);
+      if (validInProvider) {
+        map[a.id] = candidate;
+      } else if (
+        activeProvider === 'anthropic' &&
+        availableModels.some((m) => m.id === a.config.model.primary)
+      ) {
+        map[a.id] = a.config.model.primary;
+      } else {
+        map[a.id] = defaultModelForAgent(a.id, activeProvider).id;
+      }
+    }
+    return map;
+  }, [agents, gatewayState.savedModelByProject, projectId, availableModels, activeProvider]);
 
   const leadAgent = useMemo(() => {
     if (!agents || agents.length === 0) return undefined;
@@ -82,47 +145,62 @@ export default function FleetTuningPage() {
     return agents.filter((a) => a.id !== leadAgent?.id);
   }, [agents, leadAgent]);
 
-  // Compute if any primary models were modified compared to active config
+  // Compute if any agent's selected model differs from its saved baseline
   const unsavedCount = useMemo(() => {
     if (!agents) return 0;
     let count = 0;
     for (const a of agents) {
-      const pref = modelPreferences[a.id];
-      if (pref && pref !== a.config.model.primary) {
+      if (modelPreferences[a.id] !== savedPreferences[a.id]) {
         count++;
       }
     }
     return count;
-  }, [agents, modelPreferences]);
+  }, [agents, modelPreferences, savedPreferences]);
 
   const handleSelectModel = (agentId: string, modelId: string) => {
-    setModelPreferences((prev) => ({
-      ...prev,
-      [agentId]: modelId,
-    }));
+    selectAgentModelForProject(projectId, agentId, modelId);
   };
 
   const handleSavePreferences = async () => {
     if (!agents || !canTune.allowed || isOffline || unsavedCount === 0) return;
     setIsSavingPreferences(true);
     try {
+      const committed: Record<string, string> = {};
+      let mutatedBackend = false;
+
       for (const a of agents) {
-        const newPrimary = modelPreferences[a.id];
-        if (newPrimary && newPrimary !== a.config.model.primary) {
-          const updatedConfig: AgentConfig = {
-            ...a.config,
-            model: {
-              ...a.config.model,
-              primary: newPrimary as ModelId,
-            },
-          };
-          await saveMutation.mutateAsync({
-            agentId: a.id,
-            config: updatedConfig,
-            note: `Updated primary model routing to ${newPrimary}`,
-            agentName: a.name,
-          });
+        const chosenId = modelPreferences[a.id];
+        if (!chosenId) continue;
+        committed[a.id] = chosenId;
+
+        if (chosenId !== savedPreferences[a.id]) {
+          const modelOption = findProviderModelOption(activeProvider, chosenId, a.id);
+          if (modelOption.catalogModelId !== a.config.model.primary) {
+            const fallbacks = a.config.model.fallbacks.filter(
+              (f) => f !== modelOption.catalogModelId,
+            );
+            const updatedConfig: AgentConfig = {
+              ...a.config,
+              model: {
+                ...a.config.model,
+                primary: modelOption.catalogModelId,
+                fallbacks,
+              },
+            };
+            await saveMutation.mutateAsync({
+              agentId: a.id,
+              config: updatedConfig,
+              note: `Updated primary model routing to ${modelOption.displayName} (${modelOption.pinnedModel})`,
+              agentName: a.name,
+            });
+            mutatedBackend = true;
+          }
         }
+      }
+
+      commitSavedModelsForProject(projectId, committed);
+      if (!mutatedBackend) {
+        toast.success(`Saved ${providerMeta.name} model preferences for the agent fleet.`);
       }
     } finally {
       setIsSavingPreferences(false);
@@ -143,18 +221,27 @@ export default function FleetTuningPage() {
     agentId: string,
     updatedConfig: AgentConfig,
     note?: string,
+    selectedModelOptionId?: string,
   ) => {
     const targetAgent = agents?.find((a) => a.id === agentId);
-    await saveMutation.mutateAsync({
-      agentId,
-      config: updatedConfig,
-      note,
-      agentName: targetAgent?.name,
-    });
-    setModelPreferences((prev) => ({
-      ...prev,
-      [agentId]: updatedConfig.model.primary,
-    }));
+    const currentConfig = targetAgent?.config;
+    const configChanged =
+      !currentConfig ||
+      JSON.stringify(currentConfig) !== JSON.stringify(updatedConfig);
+
+    if (configChanged) {
+      await saveMutation.mutateAsync({
+        agentId,
+        config: updatedConfig,
+        note,
+        agentName: targetAgent?.name,
+      });
+    } else {
+      toast.success(`Updated ${targetAgent?.name ?? agentId} model configuration.`);
+    }
+
+    const optionId = selectedModelOptionId ?? updatedConfig.model.primary;
+    commitSavedModelsForProject(projectId, { [agentId]: optionId });
   };
 
   const saveDisabledReason = !canTune.allowed
@@ -173,6 +260,9 @@ export default function FleetTuningPage() {
           <div className="flex flex-wrap items-center gap-2">
             <Badge tone="purple" icon="hub">
               {agents?.length ?? 6} Specialists
+            </Badge>
+            <Badge tone="info" icon="key">
+              {providerMeta.name} · {availableModels.map((m) => m.shortLabel).join(' / ')}
             </Badge>
             {unsavedCount > 0 ? (
               <Badge tone="warning" icon="pending">
@@ -205,11 +295,23 @@ export default function FleetTuningPage() {
         <div className="font-mono text-[12px] font-medium tracking-[0.14em] uppercase flex items-center gap-1.5">
           <span className="text-on-surface-muted">// </span>
           <span className="text-fluent-success">AGENT MODELS</span>
+          <span className="text-on-surface-muted">·</span>
+          <span className="text-fluent-blue-light">{providerMeta.name} GATEWAY</span>
         </div>
 
-        <div className="flex items-center gap-2 text-[12px] text-on-surface-muted">
-          <StatusDot tone="success" />
-          <span>Architect-Prime directs 5 autonomous pipeline specialists</span>
+        <div className="flex items-center gap-3 text-[12px] text-on-surface-muted">
+          <div className="flex items-center gap-1.5">
+            <StatusDot tone="success" />
+            <span>
+              Loaded {availableModels.length} {providerMeta.name} models ({availableModels.map((m) => m.shortLabel).join(', ')})
+            </span>
+          </div>
+          <AppLink
+            to="settings"
+            className="text-brand hover:underline font-medium"
+          >
+            Change provider in Settings
+          </AppLink>
         </div>
       </div>
 
@@ -228,6 +330,8 @@ export default function FleetTuningPage() {
         <AgentHierarchyTree
           leadAgent={leadAgent}
           specialists={specialists}
+          activeProvider={activeProvider}
+          availableModels={availableModels}
           modelPreferences={modelPreferences}
           onSelectModel={handleSelectModel}
           onRunAgent={(id) => void handleRunAgent(id)}
@@ -243,6 +347,9 @@ export default function FleetTuningPage() {
       <AgentTuningDrawer
         agent={tuningAgent}
         open={Boolean(tuningAgent)}
+        activeProvider={activeProvider}
+        availableModels={availableModels}
+        selectedModelOptionId={tuningAgent ? modelPreferences[tuningAgent.id] : undefined}
         onClose={() => setTuningAgent(null)}
         onSaveConfig={handleSaveAgentConfig}
         isSaving={saveMutation.isPending}

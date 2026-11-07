@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useIntegrations } from '../../../api/queries';
+import { useIntegrations, useProjectId } from '../../../api/queries';
 import { connectionStore, deriveConnection } from '../../../api/state';
 import { useCan } from '../../../app/session';
 import { useNow } from '../../../app/useNow';
 import {
+  Badge,
   Button,
   Card,
   ErrorState,
@@ -16,44 +17,19 @@ import {
 } from '../../../components/ui';
 import type { Integration } from '../../../contracts';
 import { relativeTime } from '../../../domain/format';
+import {
+  PROVIDER_META,
+  PROVIDER_MODELS,
+  PROVIDER_ORDER,
+  activateProviderForProject,
+  resolveActiveProvider,
+  useProviderGateway,
+  type ModelProviderId,
+} from '../../../domain/providerModels';
 import { useRotateProviderKeyMutation } from '../mutations/useRotateProviderKeyMutation';
 import { useToggleIntegrationMutation } from '../mutations/useToggleIntegrationMutation';
 
-export type ModelProviderId = 'anthropic' | 'openai' | 'deepseek';
-
-interface ProviderMeta {
-  id: ModelProviderId;
-  name: string;
-  modelLabel: string;
-  keyPrefix: string;
-  placeholder: string;
-}
-
-const PROVIDER_META: Record<ModelProviderId, ProviderMeta> = {
-  anthropic: {
-    id: 'anthropic',
-    name: 'Anthropic',
-    modelLabel: 'Claude',
-    keyPrefix: 'sk-ant-',
-    placeholder: 'sk-ant-...',
-  },
-  openai: {
-    id: 'openai',
-    name: 'OpenAI',
-    modelLabel: 'GPT-4o',
-    keyPrefix: 'sk-proj-',
-    placeholder: 'sk-proj-...',
-  },
-  deepseek: {
-    id: 'deepseek',
-    name: 'DeepSeek',
-    modelLabel: 'DeepSeek-V3',
-    keyPrefix: 'sk-',
-    placeholder: 'sk-...',
-  },
-};
-
-const PROVIDER_ORDER: readonly ModelProviderId[] = ['anthropic', 'openai', 'deepseek'];
+export type { ModelProviderId };
 
 const LOADING_SKELETON_CARD = (
   <Card className="p-6">
@@ -81,6 +57,20 @@ interface ImportProviderKeyFormValues {
 
 export function ModelProviderKeysCard() {
   const [showKey, setShowKey] = useState(false);
+  const projectId = useProjectId();
+  const gatewayState = useProviderGateway();
+
+  const {
+    data: integrations,
+    isLoading: intLoading,
+    error: intError,
+    refetch: refetchIntegrations,
+  } = useIntegrations();
+
+  const activeFleetProvider = useMemo(
+    () => resolveActiveProvider(projectId, integrations, undefined, gatewayState),
+    [projectId, integrations, gatewayState],
+  );
 
   const {
     register,
@@ -92,20 +82,17 @@ export function ModelProviderKeysCard() {
     formState: { errors },
   } = useForm<ImportProviderKeyFormValues>({
     defaultValues: {
-      providerId: 'anthropic',
+      providerId: activeFleetProvider,
       apiKey: '',
     },
     mode: 'onSubmit',
   });
 
-  const selectedProvider = watch('providerId');
+  useEffect(() => {
+    setValue('providerId', activeFleetProvider);
+  }, [activeFleetProvider, setValue]);
 
-  const {
-    data: integrations,
-    isLoading: intLoading,
-    error: intError,
-    refetch: refetchIntegrations,
-  } = useIntegrations();
+  const selectedProvider = watch('providerId');
 
   const now = useNow();
   const isOffline = deriveConnection(connectionStore.get(), now) === 'offline';
@@ -139,6 +126,8 @@ export function ModelProviderKeysCard() {
   const selectedIntegration = providerIntegrationsById[selectedProvider];
   const isConnected =
     selectedIntegration.enabled && selectedIntegration.status === 'connected';
+  const isActiveFleet = activeFleetProvider === selectedProvider;
+  const providerModels = PROVIDER_MODELS[selectedProvider];
 
   const handleSelectProvider = (providerId: ModelProviderId) => {
     setValue('providerId', providerId);
@@ -157,6 +146,9 @@ export function ModelProviderKeysCard() {
         value: trimmed,
         providerName: meta.name,
       });
+
+      // Dynamically switch the fleet's active provider and load its models for all agents
+      activateProviderForProject(projectId, values.providerId);
 
       resetField('apiKey');
       setShowKey(false);
@@ -212,7 +204,7 @@ export function ModelProviderKeysCard() {
 
       {/* Description */}
       <p className="mt-2.5 text-[13px] leading-5 text-on-surface-variant">
-        The crew runs on {selectedMeta.modelLabel} via your {selectedMeta.name} API key. It is stored server-side in the project vault and never sent to the browser or committed anywhere.
+        The crew runs on {selectedMeta.modelLabel} via your {selectedMeta.name} API key. Saving a key activates {selectedMeta.name} models ({providerModels.map((m) => m.shortLabel).join(', ')}) across all agents on the Fleet page.
       </p>
 
       {/* Provider Selector Tabs */}
@@ -226,6 +218,7 @@ export function ModelProviderKeysCard() {
           const integration = providerIntegrationsById[id];
           const active = integration.enabled && integration.status === 'connected';
           const isSelected = selectedProvider === id;
+          const isFleetActive = activeFleetProvider === id;
 
           return (
             <button
@@ -243,6 +236,11 @@ export function ModelProviderKeysCard() {
             >
               <StatusDot tone={active ? 'success' : 'danger'} />
               <span>{meta.name}</span>
+              {isFleetActive && (
+                <Badge tone="success" mono className="h-4 px-1 text-[10px]">
+                  active
+                </Badge>
+              )}
             </button>
           );
         })}
@@ -252,11 +250,18 @@ export function ModelProviderKeysCard() {
       <div className="mt-5 flex items-center gap-3">
         <Icon name="key" size={20} className="shrink-0 text-on-surface-variant" />
         <div>
-          <h3 className="text-[15px] font-semibold text-white">{selectedMeta.name} API key</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-[15px] font-semibold text-white">{selectedMeta.name} API key</h3>
+            {isActiveFleet && (
+              <Badge tone="info" mono className="text-[10px] h-4.5 px-1.5">
+                fleet default
+              </Badge>
+            )}
+          </div>
           <p className="mt-0.5 font-mono text-[12px] text-on-surface-variant">
             {isConnected
-              ? `connected — the crew can call ${selectedMeta.modelLabel}${selectedIntegration.lastVerifiedAt
-                ? ` (verified ${relativeTime(selectedIntegration.lastVerifiedAt, now)})`
+              ? `connected — the crew can call ${selectedMeta.modelLabel} (${providerModels.map((m) => m.shortLabel).join(', ')})${selectedIntegration.lastVerifiedAt
+                ? ` · verified ${relativeTime(selectedIntegration.lastVerifiedAt, now)}`
                 : ''
               }`
               : `not connected — the crew cannot call ${selectedMeta.modelLabel}`}
@@ -289,7 +294,7 @@ export function ModelProviderKeysCard() {
                   if (!trimmed) {
                     return `Enter a valid ${meta.name} API key.`;
                   }
-                  if (trimmed.length < 8) {
+                  if (trimmed.length < 3) {
                     return `Expected a key starting with ${meta.keyPrefix}`;
                   }
                   return true;

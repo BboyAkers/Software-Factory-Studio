@@ -98,6 +98,32 @@ export function testIntegration(ps: ProjectState, id: string, actor: Actor): Con
   return result;
 }
 
+function syncFleetProviderModels(ps: ProjectState, providerId: string): void {
+  for (const agent of ps.agents) {
+    const active = agent.versions.find((v) => v.status === 'active') ?? agent.versions[agent.versions.length - 1];
+    if (!active) continue;
+    if (providerId === 'openai') {
+      active.config.model.primary = 'openai/gpt-4o';
+      active.config.model.fallbacks = ['anthropic/claude-sonnet', 'deepseek/deepseek-v3'];
+    } else if (providerId === 'deepseek') {
+      active.config.model.primary = 'deepseek/deepseek-v3';
+      active.config.model.fallbacks = ['anthropic/claude-sonnet', 'openai/gpt-4o'];
+    } else if (providerId === 'anthropic') {
+      const primary =
+        agent.id === 'architect-prime'
+          ? 'anthropic/claude-opus'
+          : agent.id === 'docuforge'
+            ? 'anthropic/claude-haiku'
+            : 'anthropic/claude-sonnet';
+      active.config.model.primary = primary;
+      active.config.model.fallbacks =
+        primary === 'anthropic/claude-sonnet'
+          ? ['anthropic/claude-haiku', 'openai/gpt-4o']
+          : ['anthropic/claude-sonnet', 'openai/gpt-4o'];
+    }
+  }
+}
+
 /** Provider keys are write-only: the mock keeps no copy at all, only the time it was last verified. */
 export function rotateProviderKey(ps: ProjectState, id: string, actor: Actor): void {
   const integration = integrationById(ps, id);
@@ -105,6 +131,7 @@ export function rotateProviderKey(ps: ProjectState, id: string, actor: Actor): v
     throw invalid([{ path: 'id', message: `${integration.name} does not take a model-provider key.`, code: 'not_a_provider' }]);
   }
   integration.lastVerifiedAt = nowIso(ps.store);
+  syncFleetProviderModels(ps, id);
   recordAudit(ps, actor, 'integration.key_rotated', { integrationId: id });
   announce(ps, integration);
 }

@@ -1,19 +1,15 @@
 import { Avatar, Badge, Button, Card, StatusDot, cx } from '../../../components/ui';
 import type { Agent } from '../../../contracts';
+import {
+  PROVIDER_META,
+  PROVIDER_MODELS,
+  defaultModelForAgent,
+  type ModelProviderId,
+  type ProviderModelOption,
+} from '../../../domain/providerModels';
 
-export interface ModelOption {
-  id: string;
-  shortLabel: string;
-  pinnedModel: string;
-}
-
-export const FLEET_MODELS: readonly ModelOption[] = [
-  { id: 'anthropic/claude-opus', shortLabel: 'Opus', pinnedModel: 'claude-opus-4-1-20250805' },
-  { id: 'anthropic/claude-sonnet', shortLabel: 'Sonnet', pinnedModel: 'claude-sonnet-4-20250514' },
-  { id: 'anthropic/claude-haiku', shortLabel: 'Haiku', pinnedModel: 'claude-3-5-haiku-20241022' },
-  { id: 'openai/gpt-4o', shortLabel: 'GPT-4o', pinnedModel: 'gpt-4o-2024-11-20' },
-  { id: 'deepseek/deepseek-v3', shortLabel: 'DeepSeek', pinnedModel: 'deepseek-chat-v3-0324' },
-];
+export type ModelOption = ProviderModelOption;
+export const FLEET_MODELS: readonly ProviderModelOption[] = PROVIDER_MODELS.anthropic;
 
 const AGENT_ROLE_COLOR: Record<string, string> = {
   purple: 'text-fluent-purple-text',
@@ -27,6 +23,8 @@ const AGENT_ROLE_COLOR: Record<string, string> = {
 interface AgentCardProps {
   agent: Agent;
   isLead?: boolean;
+  activeProvider?: ModelProviderId;
+  availableModels?: readonly ProviderModelOption[];
   selectedModelId: string;
   onSelectModel: (modelId: string) => void;
   onRunNow: () => void;
@@ -40,6 +38,8 @@ interface AgentCardProps {
 export function AgentCard({
   agent,
   isLead = false,
+  activeProvider = 'anthropic',
+  availableModels = PROVIDER_MODELS[activeProvider],
   selectedModelId,
   onSelectModel,
   onRunNow,
@@ -50,8 +50,10 @@ export function AgentCard({
   isOffline = false,
 }: AgentCardProps) {
   const roleColorClass = (agent.color && AGENT_ROLE_COLOR[agent.color]) ?? 'text-fluent-blue-light';
-  const fallbackModel = FLEET_MODELS[1]!;
-  const activeModelOption = FLEET_MODELS.find((m) => m.id === selectedModelId) ?? fallbackModel;
+  const fallbackModel = defaultModelForAgent(agent.id, activeProvider);
+  const activeModelOption =
+    availableModels.find((m) => m.id === selectedModelId) ?? fallbackModel;
+  const providerMeta = PROVIDER_META[activeProvider];
 
   const description =
     agent.responsibilities[0] ??
@@ -117,7 +119,7 @@ export function AgentCard({
         )}
       </div>
 
-      {/* Middle Section: Status & Segmented Model Control */}
+      {/* Middle Section: Status & Dynamic Provider Segmented Model Control */}
       <div className="mt-4 border-t border-fluent-border pt-3 space-y-1.5">
         <div className="flex items-center justify-between text-[11px]">
           <div className="flex items-center gap-1.5 font-mono text-on-surface-muted">
@@ -127,19 +129,22 @@ export function AgentCard({
             />
             <span className="capitalize">{agent.status}</span>
           </div>
-          <span className="font-mono text-[10px] font-bold tracking-[0.14em] uppercase text-on-surface-muted">
-            MODEL
+          <span className="font-mono text-[10px] font-bold tracking-[0.12em] uppercase text-on-surface-muted">
+            {providerMeta.name} · MODEL
           </span>
         </div>
 
-        {/* Segmented Model Pills */}
+        {/* Dynamic Segmented Model Pills for Active Provider */}
         <div
           role="radiogroup"
           aria-label={`${agent.name} primary model`}
-          className="grid grid-cols-5 gap-1 rounded-md border border-fluent-border bg-black/30 p-1"
+          style={{
+            gridTemplateColumns: `repeat(${Math.max(1, availableModels.length)}, minmax(0, 1fr))`,
+          }}
+          className="grid gap-1 rounded-md border border-fluent-border bg-black/30 p-1"
         >
-          {FLEET_MODELS.map((model) => {
-            const isSelected = selectedModelId === model.id;
+          {availableModels.map((model) => {
+            const isSelected = activeModelOption.id === model.id;
             return (
               <button
                 key={model.id}
@@ -148,8 +153,9 @@ export function AgentCard({
                 aria-checked={isSelected}
                 disabled={!canTuneAllowed || isOffline}
                 onClick={() => onSelectModel(model.id)}
+                title={`${model.displayName} (${model.pinnedModel})`}
                 className={cx(
-                  'focus-ring flex items-center justify-center rounded py-1 px-0.5 text-[11px] font-medium transition-colors',
+                  'focus-ring flex items-center justify-center rounded py-1 px-1 text-[11px] font-medium transition-colors',
                   isSelected
                     ? 'bg-white/10 text-fluent-success font-semibold border border-fluent-success/30 shadow-xs'
                     : 'text-on-surface-variant hover:bg-white/[0.04] hover:text-white',

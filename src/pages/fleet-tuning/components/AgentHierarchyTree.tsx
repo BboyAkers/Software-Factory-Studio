@@ -1,9 +1,16 @@
 import type { Agent } from '../../../contracts';
+import {
+  defaultModelForAgent,
+  type ModelProviderId,
+  type ProviderModelOption,
+} from '../../../domain/providerModels';
 import { AgentCard } from './AgentCard';
 
 interface AgentHierarchyTreeProps {
   leadAgent?: Agent;
   specialists: Agent[];
+  activeProvider: ModelProviderId;
+  availableModels: readonly ProviderModelOption[];
   modelPreferences: Record<string, string>;
   onSelectModel: (agentId: string, modelId: string) => void;
   onRunAgent: (agentId: string) => void;
@@ -17,6 +24,8 @@ interface AgentHierarchyTreeProps {
 export function AgentHierarchyTree({
   leadAgent,
   specialists,
+  activeProvider,
+  availableModels,
   modelPreferences,
   onSelectModel,
   onRunAgent,
@@ -34,7 +43,12 @@ export function AgentHierarchyTree({
           <AgentCard
             agent={leadAgent}
             isLead
-            selectedModelId={modelPreferences[leadAgent.id] ?? leadAgent.config.model.primary}
+            activeProvider={activeProvider}
+            availableModels={availableModels}
+            selectedModelId={
+              modelPreferences[leadAgent.id] ??
+              defaultModelForAgent(leadAgent.id, activeProvider).id
+            }
             onSelectModel={(modelId) => onSelectModel(leadAgent.id, modelId)}
             onRunNow={() => onRunAgent(leadAgent.id)}
             onEditPrompt={() => onEditPrompt(leadAgent)}
@@ -71,7 +85,12 @@ export function AgentHierarchyTree({
           <AgentCard
             key={specialist.id}
             agent={specialist}
-            selectedModelId={modelPreferences[specialist.id] ?? specialist.config.model.primary}
+            activeProvider={activeProvider}
+            availableModels={availableModels}
+            selectedModelId={
+              modelPreferences[specialist.id] ??
+              defaultModelForAgent(specialist.id, activeProvider).id
+            }
             onSelectModel={(modelId) => onSelectModel(specialist.id, modelId)}
             onRunNow={() => onRunAgent(specialist.id)}
             onEditPrompt={() => onEditPrompt(specialist)}
